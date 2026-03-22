@@ -12,12 +12,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Hide the global navbar on Admin and Auth routes where custom navigation exists
-  if (pathname.startsWith("/admin") || pathname.startsWith("/auth")) {
-    return null;
-  }
-
-  // Close dropdown on outside click
+  // Hooks must always be called at the top level
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setProfileOpen(false);
@@ -26,12 +21,10 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -40,6 +33,12 @@ export default function Navbar() {
     }
     return () => { document.body.style.overflow = "unset"; };
   }, [mobileMenuOpen]);
+
+  // Hide the global navbar on Admin and Auth routes where custom navigation exists
+  // This return MUST come after all hook definitions
+  if (pathname.startsWith("/admin") || pathname.startsWith("/auth")) {
+    return null;
+  }
 
   const baseLinks = [
     { label: "Home", href: "/", icon: "home" },
