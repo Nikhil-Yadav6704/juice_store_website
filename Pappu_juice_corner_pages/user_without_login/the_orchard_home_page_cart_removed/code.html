@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Orchard | Editorial Wellness &amp; Premium Juices</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#a3f69c",
+              "error-container": "#ffdad6",
+              "on-background": "#191d19",
+              "secondary-fixed-dim": "#ffb77a",
+              "surface-tint": "#1b6d24",
+              "inverse-primary": "#88d982",
+              "surface-variant": "#e0e3dd",
+              "background": "#f7faf3",
+              "on-tertiary-container": "#defbbd",
+              "tertiary": "#455c2d",
+              "tertiary-fixed": "#d0ecaf",
+              "on-primary-fixed": "#002204",
+              "tertiary-fixed-dim": "#b4cf95",
+              "tertiary-container": "#5d7543",
+              "on-secondary": "#ffffff",
+              "on-secondary-fixed-variant": "#6d3a00",
+              "on-primary": "#ffffff",
+              "secondary": "#8f4e00",
+              "on-tertiary": "#ffffff",
+              "surface": "#f7faf3",
+              "primary": "#0d631b",
+              "on-secondary-fixed": "#2e1500",
+              "on-primary-fixed-variant": "#005312",
+              "on-surface-variant": "#40493d",
+              "surface-container-highest": "#e0e3dd",
+              "error": "#ba1a1a",
+              "inverse-on-surface": "#eff2eb",
+              "on-error": "#ffffff",
+              "secondary-container": "#ff8f00",
+              "surface-bright": "#f7faf3",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-fixed-variant": "#374d20",
+              "on-primary-container": "#cbffc2",
+              "outline": "#707a6c",
+              "surface-dim": "#d8dbd4",
+              "on-secondary-container": "#623400",
+              "surface-container-high": "#e6e9e2",
+              "surface-container": "#ecefe8",
+              "outline-variant": "#bfcaba",
+              "primary-fixed-dim": "#88d982",
+              "on-tertiary-fixed": "#0e2000",
+              "secondary-fixed": "#ffdcc2",
+              "primary-container": "#2e7d32",
+              "on-surface": "#191d19",
+              "surface-container-low": "#f2f5ee",
+              "on-error-container": "#93000a",
+              "inverse-surface": "#2d312d"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-nav {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .primary-gradient {
+        background: linear-gradient(135deg, #0d631b 0%, #2e7d32 100%);
+      }
+      .image-breakout {
+        transform: translateY(-2rem);
+      }
+      .asymmetric-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+      }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body antialiased">
+<!-- TopNavBar Implementation from Shared Components JSON -->
+<nav class="fixed top-0 w-full z-50 bg-[#f7faf3]/80 dark:bg-stone-950/80 backdrop-blur-md">
+<div class="grid grid-cols-3 items-center px-8 h-20 max-w-7xl mx-auto w-full">
+<div class="flex items-center justify-start">
+<span class="text-2xl font-black text-[#0d631b] dark:text-emerald-500 tracking-tighter font-headline">Pappu Juice Corner</span>
+</div>
+<div class="hidden md:flex gap-8 items-center justify-center">
+<a class="text-[#0d631b] dark:text-emerald-400 border-b-2 border-[#0d631b] pb-1 font-headline font-bold tracking-tight" href="#">Home</a>
+<a class="text-[#40493d] dark:text-stone-400 font-medium hover:text-[#0d631b] font-headline tracking-tight transition-colors duration-300" href="#">Juices</a>
+<a class="text-[#40493d] dark:text-stone-400 font-medium hover:text-[#0d631b] font-headline tracking-tight transition-colors duration-300" href="#">Our Story</a>
+</div>
+<div class="flex items-center justify-end gap-4">
+<button class="text-[#40493d] font-semibold px-4 py-2 hover:text-[#8f4e00] transition-colors">Login</button>
+<button class="primary-gradient text-on-primary font-bold px-8 py-3 rounded-full shadow-lg hover:translate-y-[-2px] transition-transform">Signup</button>
+</div>
+</div>
+</nav>
+<main class="pt-20">
+<!-- Hero Section -->
+<section class="relative min-h-[921px] flex items-center overflow-hidden px-8">
+<div class="max-w-7xl mx-auto w-full grid md:grid-cols-2 gap-12 items-center">
+<div class="z-10">
+<span class="inline-block bg-tertiary-container text-on-tertiary-container px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6" style="">Cold Pressed Freshness</span>
+<h1 class="font-headline text-6xl md:text-8xl font-extrabold text-on-background leading-[1.05] tracking-tighter mb-8" style="">
+                        The Art of <br/><span class="text-primary italic" style="">Living Raw.</span>
+</h1>
+<p class="text-on-surface-variant text-xl max-w-md leading-relaxed mb-10" style="">
+                        Crafted by nutritionists, delivered by locals. High-integrity juices that transform your cellular energy in minutes.
+                    </p>
+<div class="flex gap-4">
+<button class="primary-gradient text-on-primary px-10 py-5 rounded-full text-lg font-bold shadow-xl flex items-center gap-3 group" style="">
+                            Explore Our Menu
+                            <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" style="">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="relative">
+<div class="absolute -top-20 -right-20 w-96 h-96 bg-primary-fixed/30 rounded-full blur-[100px]"></div>
+<div class="relative rounded-3xl overflow-hidden aspect-[4/5] shadow-2xl">
+<img class="w-full h-full object-cover" data-alt="Vibrant fresh green juice being poured into glass" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSGAIMuuVAG9Tvw-XePDuqdY8x7TlQTiS8KWJEEJYa9wUiBAcOUfUH7J5OZSYxinA-KFZ9A7cKsWwJolrj9cqWZMwj7lZK4NagFCfoRiUKW442bEK5eKqmzJC76YXBRbwkHHwzjHGsUI0GzkiTD70XsrHmklL48A8A1OYBHv-O59sHZs6PZvRaMl2BKBmoPVvB3Z1yvT2OGX03CA0PLG1lDvWOEUKS9RJBq1_9_OkLcLSby0qcTl7PTcikJzjz1r3ZVc--BdTtwXc" style=""/>
+</div>
+<!-- Ingredient Float Decorative Element -->
+<div class="absolute -bottom-10 -left-10 w-48 h-48 bg-surface-container-lowest rounded-2xl shadow-xl p-4 flex flex-col justify-center items-center text-center">
+<span class="text-secondary font-black text-4xl leading-none" style="">100%</span>
+<span class="text-on-surface-variant text-xs font-bold uppercase mt-2" style="">Organic Traceability</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Smart Hourly Delivery Bento Grid -->
+<section class="py-24 px-8 bg-surface-container-low">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+<div>
+<h2 class="font-headline text-4xl md:text-5xl font-bold text-on-surface tracking-tight" style="">Smart Hourly Delivery</h2>
+<p class="text-on-surface-variant mt-4 text-lg max-w-xl" style="">Wellness shouldn't wait. We've optimized our local loops to get nutrients to your door exactly when you need them.</p>
+</div>
+<div class="flex gap-2">
+<div class="h-1 w-24 bg-primary rounded-full"></div>
+<div class="h-1 w-8 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Delivery Tier: Free -->
+<div class="bg-surface-container-lowest p-10 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="w-14 h-14 bg-surface-container flex items-center justify-center rounded-2xl mb-8">
+<span class="material-symbols-outlined text-primary text-3xl" style="">calendar_today</span>
+</div>
+<h3 class="font-headline text-2xl font-bold mb-4" style="">Scheduled Free</h3>
+<p class="text-on-surface-variant leading-relaxed" style="">Perfect for your morning ritual. Order by midnight for guaranteed 7AM doorstep delivery at no cost.</p>
+</div>
+<div class="mt-12 pt-8 border-t border-surface-container text-primary font-bold" style="">
+                            $0.00 Delivery Fee
+                        </div>
+</div>
+<!-- Delivery Tier: Instant -->
+<div class="bg-primary text-on-primary p-10 rounded-xl shadow-xl flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter" style="">Most Popular</span>
+</div>
+<div>
+<div class="w-14 h-14 bg-primary-container flex items-center justify-center rounded-2xl mb-8">
+<span class="material-symbols-outlined text-on-primary-container text-3xl" style="">bolt</span>
+</div>
+<h3 class="font-headline text-2xl font-bold mb-4" style="">Instant</h3>
+<p class="text-primary-fixed/80 leading-relaxed" style="">Within 60 minutes. Ideal for that post-workout window or mid-day slump recovery.</p>
+</div>
+<div class="mt-12 pt-8 border-t border-primary-container font-bold" style="">
+                            $2.99 Delivery Fee
+                        </div>
+</div>
+<!-- Delivery Tier: Super Instant -->
+<div class="bg-surface-container-lowest p-10 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="w-14 h-14 bg-secondary-fixed flex items-center justify-center rounded-2xl mb-8">
+<span class="material-symbols-outlined text-secondary text-3xl" style="">rocket_launch</span>
+</div>
+<h3 class="font-headline text-2xl font-bold mb-4" style="">Super Instant</h3>
+<p class="text-on-surface-variant leading-relaxed" style="">Priority routing. We bypass the queue to get your juice from press to hand in under 20 minutes.</p>
+</div>
+<div class="mt-12 pt-8 border-t border-surface-container text-secondary font-bold" style="">
+                            $5.99 Priority Pass
+                        </div>
+</div>
+</div>
+</div>
+</section>
+<!-- High-Impact Editorial Section -->
+<section class="py-32 px-8 overflow-hidden">
+<div class="max-w-7xl mx-auto">
+<div class="grid md:grid-cols-2 gap-20 items-center">
+<div class="order-2 md:order-1 relative">
+<div class="bg-surface-container h-[600px] w-full rounded-2xl overflow-hidden shadow-inner">
+<img class="w-full h-full object-cover mix-blend-multiply opacity-90 scale-110" data-alt="Editorial close up of fresh oranges and ginger" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgoaMl631vPjR_sRre0cm6X2KBd0t8shCUzWi1DLUDlTqn73bNNWMy2f8Y28d3TALGlwylLeVNUewlqlLUpsPKD8iYaY9ExTGcIBITsVktz3J9gVKfAMwcg7Vddu-WWBXyBKGKRjvz5LB7pJuHIcdfuF200ENGp1dpqa7d0grgC44XxYvTxReBz9dJ8kUfDpFR-76t9GoFKgHgznlZO8RgbDhXmKwIu1qTtjxOm5TDtsu52H_fLBbi3vei8MrUaK2bmUXt6w9Qdqs" style=""/>
+</div>
+<div class="absolute -top-12 -right-12 bg-surface-container-lowest p-8 rounded-xl shadow-2xl max-w-xs">
+<h4 class="font-headline font-bold text-lg mb-2" style="">Botanical Sourcing</h4>
+<p class="text-sm text-on-surface-variant" style="">We partner with three regenerative farms within a 50-mile radius to ensure maximum phytonutrient density.</p>
+</div>
+</div>
+<div class="order-1 md:order-2">
+<h2 class="font-headline text-5xl font-extrabold text-on-surface leading-tight mb-8" style="">Papu Juice<br/>Integrity Standard.</h2>
+<div class="space-y-8">
+<div class="flex gap-6">
+<span class="text-4xl font-black text-outline-variant/30 font-headline" style="">01</span>
+<div>
+<h5 class="text-xl font-bold mb-2" style="">No HPP Ever</h5>
+<p class="text-on-surface-variant" style="">We never use high-pressure processing. Our juice stays alive, unpasteurized, and full of active enzymes.</p>
+</div>
+</div>
+<div class="flex gap-6">
+<span class="text-4xl font-black text-outline-variant/30 font-headline" style="">02</span>
+<div>
+<h5 class="text-xl font-bold mb-2" style="">Glass Over Plastic</h5>
+<p class="text-on-surface-variant" style="">Bottled exclusively in sustainable Italian glass to prevent microplastic leaching and preserve flavor.</p>
+</div>
+</div>
+<div class="flex gap-6">
+<span class="text-4xl font-black text-outline-variant/30 font-headline" style="">03</span>
+<div>
+<h5 class="text-xl font-bold mb-2" style="">Hourly Pressing</h5>
+<p class="text-on-surface-variant" style="">Our kitchens operate in shifts to ensure no bottle sits for more than 4 hours before it's shipped.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="px-8 pb-20">
+<div class="max-w-7xl mx-auto primary-gradient rounded-[3rem] p-16 md:p-24 text-center relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] opacity-10"></div>
+<div class="relative z-10">
+<h2 class="font-headline text-4xl md:text-6xl font-bold text-on-primary mb-8 tracking-tighter" style="">Ready to feel the difference?</h2>
+<p class="text-primary-fixed text-xl mb-12 max-w-2xl mx-auto opacity-90" style="">Join 15,000+ neighbors who have upgraded their daily hydration to Papu Juice Corner.</p>
+<div class="flex flex-col md:flex-row justify-center gap-4">
+<button class="bg-surface-container-lowest text-primary px-12 py-5 rounded-full text-lg font-extrabold shadow-xl hover:scale-105 transition-transform" style="">Get Started Now</button>
+<button class="bg-transparent border-2 border-primary-fixed text-primary-fixed px-12 py-5 rounded-full text-lg font-bold hover:bg-primary-fixed hover:text-primary transition-colors" style="">Browse Subscriptions</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Implementation from Shared Components JSON -->
+<footer class="w-full py-12 px-8 mt-20 bg-[#ecefe8] dark:bg-stone-900">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-7xl mx-auto">
+<div class="flex flex-col gap-4">
+<span class="text-lg font-bold text-[#0d631b] dark:text-emerald-500 font-headline" style="">Papu Juice Corner</span>
+<p class="text-[#40493d] dark:text-stone-400 font-['Manrope'] text-sm leading-relaxed" style="">Crafting editorial wellness through the lens of local, organic nourishment.</p>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="font-bold text-on-surface" style="">Explore</h4>
+<div class="flex flex-col gap-2">
+<a class="text-[#40493d] dark:text-stone-400 hover:text-[#8f4e00] transition-colors duration-200" href="#" style="">About Us</a>
+<a class="text-[#40493d] dark:text-stone-400 hover:text-[#8f4e00] transition-colors duration-200" href="#" style="">Sourcing</a>
+<a class="text-[#40493d] dark:text-stone-400 hover:text-[#8f4e00] transition-colors duration-200" href="#" style="">Wellness Journal</a>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="font-bold text-on-surface" style="">Support</h4>
+<div class="flex flex-col gap-2">
+<a class="text-[#40493d] dark:text-stone-400 hover:text-[#8f4e00] transition-colors duration-200" href="#" style="">Shipping</a>
+<a class="text-[#40493d] dark:text-stone-400 hover:text-[#8f4e00] transition-colors duration-200" href="#" style="">Contact</a>
+<a class="text-[#40493d] dark:text-stone-400 hover:text-[#8f4e00] transition-colors duration-200" href="#" style="">Privacy</a>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="font-bold text-on-surface" style="">Newsletter</h4>
+<div class="flex gap-2">
+<input class="bg-surface-container-low border-none rounded-lg text-sm w-full focus:ring-1 focus:ring-primary" placeholder="Email address" type="text"/>
+<button class="bg-primary text-on-primary p-2 rounded-lg" style="">
+<span class="material-symbols-outlined" style="">east</span>
+</button>
+</div>
+<p class="text-xs text-[#40493d] mt-4 font-['Manrope'] leading-relaxed" style="">© 2024 Papu Juice Corner. Stay Organic.</p>
+</div>
+</div>
+</footer>
+<!-- Floating Action Button: Cart -->
+</body></html>
