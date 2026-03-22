@@ -123,11 +123,11 @@ export default function CartPage() {
                    Live Batch
                  </span>
                  <span className="font-bold text-[14px] md:text-base text-white tracking-tight">
-                   {liveData?.count || 0} / 5 Orders Reached
+                   {liveData?.count || 0} / 5 Juices Reached
                  </span>
                </div>
                <p className="text-[11px] md:text-xs text-[#c8d4c3] font-medium max-w-md">
-                 Hourly free batches require 5 orders to dispatch. If not reached, orders roll over to the next hour.
+                 Hourly free batches require 5 juices to dispatch. If not reached, orders roll over to the next hour.
                </p>
              </div>
              
@@ -262,7 +262,7 @@ export default function CartPage() {
                         <span className="font-bold text-[#1b4321] text-[13px] md:text-sm">Free</span>
                       </div>
                       <p className="text-[10px] md:text-[11px] text-[#5c6359] font-medium mt-1.5 leading-relaxed">
-                        Waits for the current hour to close. Requires a 5-order minimum across all customers to dispatch. If not met, rolls over to the next hour.
+                        Waits for the current hour to close. Requires a 5-juice minimum across all customers to dispatch. If not met, rolls over to the next hour.
                       </p>
                     </div>
                   </label>
@@ -283,7 +283,7 @@ export default function CartPage() {
                         <span className="font-bold text-on-surface text-[13px] md:text-sm">₹{instantPrice.toFixed(2)}</span>
                       </div>
                       <p className="text-[10px] md:text-[11px] text-[#5c6359] font-medium mt-1.5 leading-relaxed">
-                        Still waits for the batch to close, but <strong>bypasses the 5-order minimum</strong>. Ensures yours (and everyone else's in the batch) goes out immediately when the timer ends.
+                        Still waits for the batch to close, but <strong>bypasses the 5-juice minimum</strong>. Ensures yours (and everyone else's in the batch) goes out immediately when the timer ends.
                       </p>
                     </div>
                   </label>

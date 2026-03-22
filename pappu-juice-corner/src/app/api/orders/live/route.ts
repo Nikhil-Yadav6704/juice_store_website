@@ -10,10 +10,14 @@ export async function GET() {
   const startOfHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0);
   const endOfHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 59, 59);
 
-  // Count all orders that are not yet delivered or cancelled (actual kitchen workload)
-  const count = await Order.countDocuments({
+  // Sum all juices in orders that are not yet delivered or cancelled
+  const activeOrders = await Order.find({
     status: { $in: ["Pending", "Preparing", "Shipped"] },
   });
+
+  const count = activeOrders.reduce((total, order) => {
+    return total + order.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+  }, 0);
 
   return NextResponse.json({
     count,

@@ -71,7 +71,7 @@ export default function OrdersPage() {
                 <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-[#fbdfc6] mb-0.5">Kitchen Status</span>
                 <div className="font-headline font-bold flex items-baseline gap-1.5">
                    <span className="text-2xl md:text-4xl tracking-tighter">{liveData?.count || 0}</span>
-                   <span className="text-sm md:text-lg font-medium text-white/80">orders ahead</span>
+                   <span className="text-sm md:text-lg font-medium text-white/80">juices ahead</span>
                 </div>
               </div>
             </div>
