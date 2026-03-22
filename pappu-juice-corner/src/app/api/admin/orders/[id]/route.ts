@@ -12,12 +12,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 
   try {
-    const { status } = await req.json();
+    const { status, cancellationReason, cancelledBy } = await req.json();
     await connectToDatabase();
+    
+    const updateData: any = { status };
+    if (status === 'Cancelled') {
+      updateData.cancellationReason = cancellationReason || "Cancelled by admin";
+      updateData.cancelledBy = cancelledBy || "admin";
+    }
     
     const updatedOrder = await Order.findByIdAndUpdate(
       id,
-      { status },
+      updateData,
       { new: true }
     );
 

@@ -46,12 +46,18 @@ export default function AdminOrdersPage() {
     return () => clearInterval(interval);
   }, [liveData]);
 
-  const handleStatusUpdate = async (id: string, newStatus: string) => {
+  const handleStatusUpdate = async (id: string, newStatus: string, cancellationReason?: string) => {
     try {
+      const body: any = { status: newStatus };
+      if (newStatus === 'Cancelled') {
+        body.cancellationReason = cancellationReason;
+        body.cancelledBy = 'admin';
+      }
+      
       const res = await fetch(`/api/admin/orders/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify(body),
       });
       if (res.ok) {
         toast.success("Order status updated");
@@ -242,41 +248,52 @@ export default function AdminOrdersPage() {
                     
                     {/* Actions */}
                     <td className="px-8 py-6 text-right">
-                      {order.status === "Pending" && (
-                        <button onClick={() => handleStatusUpdate(order._id, "Preparing")} className="bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#005312] transition-colors">
-                          Start Prep
-                        </button>
-                      )}
-                      {order.status === "Preparing" && (
-                        <button onClick={() => handleStatusUpdate(order._id, "Out for Delivery")} className="bg-[#8f4e00] text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#623400] transition-colors">
-                          Dispatch
-                        </button>
-                      )}
-                      {order.status === "Out for Delivery" && (
-                        <button onClick={() => handleStatusUpdate(order._id, "Delivered")} className="bg-surface-container-highest text-on-surface-variant px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-outline-variant hover:text-on-surface transition-colors">
-                          Track
-                        </button>
-                      )}
-                      {order.status === "Delivered" && (
+                      <div className="flex items-center justify-end gap-3">
+                        {order.status === "Pending" && (
+                          <button onClick={() => handleStatusUpdate(order._id, "Preparing")} className="bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#005312] transition-colors shadow-sm">
+                            Start Prep
+                          </button>
+                        )}
+                        {order.status === "Preparing" && (
+                          <button onClick={() => handleStatusUpdate(order._id, "Out for Delivery")} className="bg-[#8f4e00] text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#623400] transition-colors shadow-sm">
+                            Dispatch
+                          </button>
+                        )}
+                        {order.status === "Out for Delivery" && (
+                          <button onClick={() => handleStatusUpdate(order._id, "Delivered")} className="bg-surface-container-highest text-on-surface-variant px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-outline-variant hover:text-on-surface transition-colors shadow-sm">
+                            Track
+                          </button>
+                        )}
+                        
                         <div className="relative" ref={openMenuId === order._id ? menuRef : null}>
-                          <button onClick={() => setOpenMenuId(openMenuId === order._id ? null : order._id)} className="text-outline-variant hover:text-on-surface transition-colors">
+                          <button onClick={() => setOpenMenuId(openMenuId === order._id ? null : order._id)} className="text-outline-variant hover:text-on-surface transition-colors p-2 rounded-full hover:bg-surface-container">
                             <span className="material-symbols-outlined text-[20px]">more_vert</span>
                           </button>
                           {openMenuId === order._id && (
-                            <div className="absolute right-0 top-8 w-48 bg-surface-container-lowest shadow-xl rounded-xl z-50 border border-surface-container py-2">
+                            <div className="absolute right-0 top-10 w-48 bg-surface-container-lowest shadow-xl rounded-xl z-50 border border-surface-container py-2 animate-in fade-in zoom-in duration-200">
                               <button onClick={() => { handleExportOrders(); setOpenMenuId(null); }} className="w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-surface-container transition-colors flex items-center gap-2">
                                 <span className="material-symbols-outlined text-[16px]">download</span> Export Order
                               </button>
                               <button onClick={() => { window.print(); setOpenMenuId(null); }} className="w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-surface-container transition-colors flex items-center gap-2">
                                 <span className="material-symbols-outlined text-[16px]">print</span> Print Receipt
                               </button>
-                              <button onClick={() => { handleStatusUpdate(order._id, 'Cancelled'); setOpenMenuId(null); }} className="w-full text-left px-4 py-2.5 text-sm font-medium text-error hover:bg-[#ffdad6] transition-colors flex items-center gap-2">
-                                <span className="material-symbols-outlined text-[16px]">delete</span> Cancel Order
-                              </button>
+                              {order.status !== 'Cancelled' && (
+                                <button onClick={() => { 
+                                  const reason = window.prompt("Enter cancellation reason to show the customer:");
+                                  if (reason !== null && reason.trim() !== "") {
+                                    handleStatusUpdate(order._id, 'Cancelled', reason.trim());
+                                  } else if (reason !== null) {
+                                    toast.error("Cancellation reason is required.");
+                                  }
+                                  setOpenMenuId(null); 
+                                }} className="w-full text-left px-4 py-2.5 text-sm font-medium text-error hover:bg-[#ffdad6] transition-colors flex items-center gap-2 border-t border-surface-container mt-1 pt-2">
+                                  <span className="material-symbols-outlined text-[16px]">delete_forever</span> Cancel Order
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 ))

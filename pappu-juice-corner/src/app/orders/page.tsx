@@ -9,7 +9,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function OrdersPage() {
   const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000 });
   const { data: rewardData } = useSWR("/api/user/rewards", fetcher);
-  const { data: orders, isLoading } = useSWR("/api/orders", fetcher);
+  const { data: orders, isLoading, mutate: mutateOrders } = useSWR("/api/orders", fetcher);
   
   const [timeLeft, setTimeLeft] = useState("");
   const [showAllHistory, setShowAllHistory] = useState(false);
@@ -165,7 +165,21 @@ export default function OrdersPage() {
                            </div>
                            
                            {order.status === "Pending" ? (
-                             <button onClick={() => toast.error("Cancellation currently not supported here.")} className="text-[#ba1a1a] font-bold text-[13px] hover:underline transition-all">Cancel Order</button>
+                             <button onClick={async () => {
+                               if (window.confirm("Are you sure you want to cancel this order?")) {
+                                 try {
+                                   const res = await fetch(`/api/orders/${order._id}/cancel`, { method: "POST" });
+                                   if (res.ok) {
+                                     toast.success("Order cancelled");
+                                     mutateOrders();
+                                   } else {
+                                     toast.error("Failed to cancel order");
+                                   }
+                                 } catch {
+                                   toast.error("An error occurred");
+                                 }
+                               }
+                             }} className="text-[#ba1a1a] font-bold text-[13px] hover:underline transition-all">Cancel Order</button>
                            ) : (
                              <span className="text-[#5c6359] font-medium text-[12px]">Cannot cancel once prep starts</span>
                            )}
@@ -185,38 +199,46 @@ export default function OrdersPage() {
                 ) : (
                   <div className="space-y-3 md:space-y-4">
                     {pastOrders.map((order: any) => (
-                      <div key={order._id} className="bg-[#f2f5ee] rounded-[1.25rem] md:rounded-[1.5rem] p-4 md:p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-3 md:gap-4 border border-transparent hover:border-[#dce4d5] transition-colors">
-                        <div className="flex items-center gap-4 md:gap-5">
-                          <div className="w-10 h-10 md:w-12 md:h-12 bg-[#e4ebdd] rounded-full flex items-center justify-center shrink-0">
-                             <span className="material-symbols-outlined text-[#5c6359] text-[18px] md:text-[20px]">shopping_bag</span>
+                      <div key={order._id}>
+                        <div className="bg-[#f2f5ee] rounded-[1.25rem] md:rounded-[1.5rem] p-4 md:p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-3 md:gap-4 border border-transparent hover:border-[#dce4d5] transition-colors">
+                          <div className="flex items-center gap-4 md:gap-5">
+                            <div className="w-10 h-10 md:w-12 md:h-12 bg-[#e4ebdd] rounded-full flex items-center justify-center shrink-0">
+                               <span className="material-symbols-outlined text-[#5c6359] text-[18px] md:text-[20px]">shopping_bag</span>
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-[15px] md:text-[16px] text-on-surface font-headline">{order.orderId}</h4>
+                              <p className="text-[11px] md:text-[12px] text-[#5c6359] font-medium mt-0.5">
+                                {new Date(order.createdAt).toLocaleDateString()} <span className="mx-1">•</span> {order.status}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-bold text-[15px] md:text-[16px] text-on-surface font-headline">{order.orderId}</h4>
-                            <p className="text-[11px] md:text-[12px] text-[#5c6359] font-medium mt-0.5">
-                              {new Date(order.createdAt).toLocaleDateString()} <span className="mx-1">•</span> {order.status}
-                            </p>
-                          </div>
-                        </div>
 
-                        <div className="flex items-center gap-4 md:gap-6 sm:justify-end pl-14 sm:pl-0">
-                           <span className="font-bold text-base md:text-lg text-on-surface">₹{Number(order.grandTotal).toFixed(2)}</span>
-                           <button onClick={async () => {
-                             try {
-                               for (const item of order.items) {
-                                 await fetch('/api/cart', {
-                                   method: 'POST',
-                                   headers: { 'Content-Type': 'application/json' },
-                                   body: JSON.stringify({ productId: item.productId, quantity: item.quantity })
-                                 });
+                          <div className="flex items-center gap-4 md:gap-6 sm:justify-end pl-14 sm:pl-0">
+                             <span className="font-bold text-base md:text-lg text-on-surface">₹{Number(order.grandTotal).toFixed(2)}</span>
+                             <button onClick={async () => {
+                               try {
+                                 for (const item of order.items) {
+                                   await fetch('/api/cart', {
+                                     method: 'POST',
+                                     headers: { 'Content-Type': 'application/json' },
+                                     body: JSON.stringify({ productId: item.productId, quantity: item.quantity })
+                                   });
+                                 }
+                                 toast.success('Items added to your cart!');
+                               } catch {
+                                 toast.error('Failed to reorder. Please try again.');
                                }
-                               toast.success('Items added to your cart!');
-                             } catch {
-                               toast.error('Failed to reorder. Please try again.');
-                             }
-                           }} className="bg-white text-on-surface px-5 md:px-6 py-2 md:py-2.5 rounded-full text-[12px] font-bold shadow-sm hover:shadow transition-shadow border border-[#dce4d5]">
-                             Reorder
-                           </button>
+                             }} className="bg-white text-on-surface px-5 md:px-6 py-2 md:py-2.5 rounded-full text-[12px] font-bold shadow-sm hover:shadow transition-shadow border border-[#dce4d5]">
+                               Reorder
+                             </button>
+                          </div>
                         </div>
+                        
+                        {order.status === 'Cancelled' && order.cancellationReason && (
+                          <div className="mt-2 p-3 bg-[#ffdad6] text-[#ba1a1a] rounded-xl font-bold text-[13px] border border-[#ffb4ab]">
+                            {order.cancelledBy === 'admin' ? `Cancelled by Owner: ${order.cancellationReason}` : order.cancellationReason}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

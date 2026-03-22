@@ -26,6 +26,8 @@ const OrderSchema = new Schema(
       enum: ["Pending", "Preparing", "Out for Delivery", "Delivered", "Cancelled"],
       default: "Pending",
     },
+    cancellationReason: { type: String },
+    cancelledBy: { type: String, enum: ['admin', 'user'] },
   },
   { timestamps: true }
 );
