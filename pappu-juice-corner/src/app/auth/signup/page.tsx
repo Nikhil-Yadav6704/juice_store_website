@@ -14,17 +14,50 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
   });
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleSendOtp = async () => {
+    if (!formData.email) {
+      toast.error("Please enter your email first");
+      return;
+    }
+    setSendingOtp(true);
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      });
+      if (res.ok) {
+        setOtpSent(true);
+        toast.success("Verification code sent to your email!");
+      } else {
+        const data = await res.json();
+        toast.error(data.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match!");
+      return;
+    }
+    if (!otpSent) {
+      toast.error("Please verify your email first!");
       return;
     }
 
@@ -34,7 +67,7 @@ export default function SignupPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, otp }),
       });
 
       const data = await res.json();
@@ -139,10 +172,24 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              {/* Row 2 */}
-              <div>
-                <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Email Address</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full px-5 py-4 rounded-xl bg-[#f2f5ee] border-none text-on-surface focus:ring-2 focus:ring-primary/20 outline-none transition-shadow placeholder:text-on-surface-variant/50 font-medium" placeholder="julian@atelier.com" />
+              {/* Row 2 - Email & OTP */}
+              <div className="space-y-6">
+                <div className="relative">
+                  <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Email Address</label>
+                  <div className="flex gap-4">
+                    <input type="email" name="email" value={formData.email} onChange={handleChange} required className="flex-1 px-5 py-4 rounded-xl bg-[#f2f5ee] border-none text-on-surface focus:ring-2 focus:ring-primary/20 outline-none transition-shadow placeholder:text-on-surface-variant/50 font-medium" placeholder="julian@atelier.com" />
+                    <button type="button" onClick={handleSendOtp} disabled={sendingOtp || otpSent} className="px-6 rounded-xl bg-surface-container-high text-on-surface font-bold text-xs hover:bg-surface-container-highest transition-colors disabled:opacity-50">
+                      {sendingOtp ? "Sending..." : otpSent ? "Sent" : "Send OTP"}
+                    </button>
+                  </div>
+                </div>
+
+                {otpSent && (
+                  <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                    <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Verification Code</label>
+                    <input type="text" name="otp" value={otp} onChange={(e) => setOtp(e.target.value)} required className="w-full px-5 py-4 rounded-xl bg-[#c4eed0]/30 border-2 border-primary/20 text-on-surface focus:ring-2 focus:ring-primary/20 outline-none transition-shadow placeholder:text-on-surface-variant/50 font-bold tracking-[0.5em] text-center text-xl" placeholder="000000" maxLength={6} />
+                  </div>
+                )}
               </div>
 
               {/* Row 3 - Delivery Address */}

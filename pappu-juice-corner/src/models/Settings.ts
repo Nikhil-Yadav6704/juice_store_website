@@ -21,6 +21,11 @@ export interface ISettings extends Document {
     superInstantPrice: number;
     taxRate: number;
   };
+  rewards: {
+    enabled: boolean;
+    threshold: number;
+    rewardText: string;
+  };
 }
 
 const SettingsSchema: Schema = new Schema(
@@ -44,6 +49,11 @@ const SettingsSchema: Schema = new Schema(
       instantPrice: { type: Number, default: 5.50 },
       superInstantPrice: { type: Number, default: 9.00 },
       taxRate: { type: Number, default: 0.02 }
+    },
+    rewards: {
+      enabled: { type: Boolean, default: true },
+      threshold: { type: Number, default: 10 },
+      rewardText: { type: String, default: "You're only {count} orders away from a free seasonal tonic!" }
     }
   },
   { timestamps: true }

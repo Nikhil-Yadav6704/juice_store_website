@@ -4,6 +4,7 @@ import { Providers } from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingCart from "@/components/FloatingCart";
+import StatusWatcher from "@/components/StatusWatcher";
 
 export const metadata: Metadata = {
   title: {
@@ -41,6 +42,7 @@ export default function RootLayout({
       </head>
       <body className="bg-background text-on-background font-body antialiased">
         <Providers>
+          <StatusWatcher />
           <Navbar />
           <main className="min-h-screen pt-20">
             {children}

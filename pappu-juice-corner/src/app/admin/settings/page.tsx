@@ -50,7 +50,7 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const handleChange = (section: string, field: string, value: string | number) => {
+  const handleChange = (section: string, field: string, value: string | number | boolean) => {
     setSettings((prev: any) => ({
       ...prev,
       [section]: {
@@ -237,6 +237,46 @@ export default function AdminSettingsPage() {
                 value={settings.contact?.hours || ""}
                 onChange={(e) => handleChange("contact", "hours", e.target.value)}
                 className="w-full bg-surface-container-lowest border border-surface-container-highest rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface resize-none"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Orchard Rewards Settings */}
+        <section className="bg-white rounded-[1.5rem] p-5 md:p-8 shadow-sm border border-surface-container">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2 text-on-surface">
+              <span className="material-symbols-outlined text-primary">redeem</span>
+              <h2 className="text-lg md:text-xl font-bold font-headline">Orchard Rewards</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Enabled</span>
+              <button
+                onClick={() => handleChange("rewards", "enabled", !settings.rewards?.enabled)}
+                className={`w-12 h-6 rounded-full transition-colors relative ${settings.rewards?.enabled ? 'bg-primary' : 'bg-surface-container-highest'}`}
+              >
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${settings.rewards?.enabled ? 'left-7' : 'left-1'}`}></div>
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Reward Threshold (Juices count for free one)</label>
+              <input
+                type="number"
+                value={settings.rewards?.threshold ?? 10}
+                onChange={(e) => handleChange("rewards", "threshold", parseInt(e.target.value))}
+                className="w-full bg-surface-container-lowest border border-surface-container-highest rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Progress Text (Use {"{count}"} for remaining amount)</label>
+              <input
+                type="text"
+                value={settings.rewards?.rewardText || ""}
+                onChange={(e) => handleChange("rewards", "rewardText", e.target.value)}
+                className="w-full bg-surface-container-lowest border border-surface-container-highest rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface"
+                placeholder="You're only {count} orders away from a free seasonal tonic!"
               />
             </div>
           </div>

@@ -103,10 +103,10 @@ export default function Home() {
                 </p>
               </div>
               <div className="text-[13px] text-white font-bold mt-6 md:mt-8 relative z-10">
-                ₹2.99 <span className="text-white/70">Delivery Fee</span>
+                ₹{settings?.delivery?.instantPrice || "2.99"} <span className="text-white/70">Delivery Fee</span>
               </div>
             </div>
-
+ 
             {/* Super Instant */}
             <div className="bg-surface-container-lowest p-8 md:p-10 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between border border-surface-container min-h-[300px] md:min-h-[380px]">
               <div>
@@ -119,7 +119,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="text-[13px] text-[#8f4e00] font-bold mt-6 md:mt-8">
-                ₹5.99 <span className="text-[#8f4e00]/70">Priority Pass</span>
+                ₹{settings?.delivery?.superInstantPrice || "5.99"} <span className="text-[#8f4e00]/70">Priority Pass</span>
               </div>
             </div>
 

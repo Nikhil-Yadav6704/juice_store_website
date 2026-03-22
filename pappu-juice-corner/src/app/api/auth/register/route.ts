@@ -2,16 +2,28 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import connectToDatabase from "@/lib/db";
 import User from "@/models/User";
+import OtpAuth from "@/models/OtpAuth";
 
 export async function POST(req: Request) {
   try {
-    const { fullName, phone, email, deliveryAddress, password } = await req.json();
+    const { fullName, phone, email, deliveryAddress, password, otp } = await req.json();
 
-    if (!fullName || !phone || !email || !deliveryAddress || !password) {
-      return NextResponse.json({ message: "All fields are required" }, { status: 400 });
+    if (!fullName || !phone || !email || !deliveryAddress || !password || !otp) {
+      return NextResponse.json({ message: "All fields including OTP are required" }, { status: 400 });
     }
 
     await connectToDatabase();
+
+    // Verify OTP
+    const otpRecord = await OtpAuth.findOne({ email, otp, type: "signup" });
+    if (!otpRecord) {
+      return NextResponse.json({ message: "Invalid or expired OTP" }, { status: 400 });
+    }
+
+    // Check if OTP is expired (Mongoose TTL might take time to delete, so double check)
+    if (new Date() > otpRecord.expiresAt) {
+        return NextResponse.json({ message: "OTP has expired" }, { status: 400 });
+    }
 
     const existingUser = await User.findOne({
       $or: [{ email }, { phone }],
@@ -35,6 +47,9 @@ export async function POST(req: Request) {
       role: "user",
       status: "active",
     });
+
+    // Delete the used OTP
+    await OtpAuth.deleteOne({ _id: otpRecord._id });
 
     return NextResponse.json({ message: "User created successfully" }, { status: 201 });
   } catch (error: any) {

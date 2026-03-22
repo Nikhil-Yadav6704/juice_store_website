@@ -29,6 +29,11 @@ export async function POST(req: Request) {
     
     await connectToDatabase();
     
+    // Get Settings for delivery prices
+    const Settings = (await import("@/models/Settings")).default;
+    const settings = await Settings.findOne();
+    const User = (await import("@/models/User")).default;
+
     // Get user's cart
     const cart = await Cart.findOne({ userId: session.user.id }).populate("items.productId");
     if (!cart || cart.items.length === 0) {
@@ -37,9 +42,11 @@ export async function POST(req: Request) {
 
     // Calculate totals
     let subtotal = 0;
+    let totalJuices = 0;
     const orderItems = cart.items.map((item: any) => {
       const lineTotal = item.quantity * item.productId.price;
       subtotal += lineTotal;
+      totalJuices += item.quantity;
       return {
         productId: item.productId._id,
         name: item.productId.name,
@@ -50,8 +57,8 @@ export async function POST(req: Request) {
     });
 
     let deliveryFee = 0;
-    if (deliveryType === "instant") deliveryFee = 50;
-    if (deliveryType === "super_instant") deliveryFee = 100;
+    if (deliveryType === "instant") deliveryFee = settings?.delivery?.instantPrice || 5.50;
+    if (deliveryType === "super_instant") deliveryFee = settings?.delivery?.superInstantPrice || 9.00;
 
     const grandTotal = subtotal + deliveryFee;
 
@@ -68,6 +75,9 @@ export async function POST(req: Request) {
       paymentMethod: "COD",
       status: "Pending",
     });
+
+    // Increment user's juice count for rewards
+    await User.findByIdAndUpdate(session.user.id, { $inc: { juicesCount: totalJuices } });
 
     // Clear Cart
     cart.items = [];

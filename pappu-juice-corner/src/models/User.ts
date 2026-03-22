@@ -9,6 +9,7 @@ const UserSchema = new Schema(
     password: { type: String, required: true },
     role: { type: String, enum: ["user", "admin"], default: "user" },
     status: { type: String, enum: ["active", "blocked"], default: "active" },
+    juicesCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

@@ -8,6 +8,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function OrdersPage() {
   const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000 });
+  const { data: rewardData } = useSWR("/api/user/rewards", fetcher);
   const { data: orders, isLoading } = useSWR("/api/orders", fetcher);
   
   const [timeLeft, setTimeLeft] = useState("");
@@ -69,7 +70,7 @@ export default function OrdersPage() {
               <div className="flex flex-col min-w-0">
                 <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-[#fbdfc6] mb-0.5">Kitchen Status</span>
                 <div className="font-headline font-bold flex items-baseline gap-1.5">
-                   <span className="text-2xl md:text-4xl tracking-tighter">{liveData?.count || 12}</span>
+                   <span className="text-2xl md:text-4xl tracking-tighter">{liveData?.count || 0}</span>
                    <span className="text-sm md:text-lg font-medium text-white/80">orders ahead</span>
                 </div>
               </div>
@@ -79,7 +80,7 @@ export default function OrdersPage() {
             <div className="flex-shrink-0">
                <div className="bg-white text-on-surface px-4 md:px-6 py-2.5 md:py-3.5 rounded-full font-bold text-[12px] md:text-[13px] flex items-center gap-2 shadow-sm w-fit">
                  <span className="material-symbols-outlined text-[#185324] text-[16px] md:text-[18px]">info</span>
-                 STATUS: PREPARING
+                 STATUS: {liveData?.count > 0 ? "PREPARING" : "READY"}
                </div>
             </div>
 
@@ -220,23 +221,25 @@ export default function OrdersPage() {
             <div className="md:col-span-4 space-y-4 md:space-y-6">
                
                {/* Orchard Rewards */}
-               <div className="bg-[#e9eee5] rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 shadow-sm border border-[#dce4d5] relative overflow-hidden">
-                 <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#d1ecb4] opacity-20 transform -rotate-12 scale-150 blur-3xl rounded-full"></div>
-                 
-                 <div className="relative z-10">
-                   <h3 className="font-headline text-lg md:text-xl font-bold text-[#1b4321] mb-2 tracking-tight">Orchard Rewards</h3>
-                   <p className="text-[12px] md:text-[13px] text-[#5c6359] font-medium leading-relaxed mb-6 md:mb-8 max-w-[200px]">
-                     You're only 2 orders away from a free seasonal tonic!
-                   </p>
+               {rewardData?.rewards?.enabled && (
+                 <div className="bg-[#e9eee5] rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 shadow-sm border border-[#dce4d5] relative overflow-hidden">
+                   <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#d1ecb4] opacity-20 transform -rotate-12 scale-150 blur-3xl rounded-full"></div>
                    
-                   <div className="w-full h-2.5 bg-[#dce4d5] rounded-full overflow-hidden mb-3">
-                     <div className="h-full bg-[#1b4321] w-[80%] rounded-full"></div>
-                   </div>
-                   <div className="text-[9px] font-black tracking-widest uppercase text-[#5c6359]">
-                     8/10 Juices Collected
+                   <div className="relative z-10">
+                     <h3 className="font-headline text-lg md:text-xl font-bold text-[#1b4321] mb-2 tracking-tight">Orchard Rewards</h3>
+                     <p className="text-[12px] md:text-[13px] text-[#5c6359] font-medium leading-relaxed mb-6 md:mb-8 max-w-[200px]">
+                       {rewardData.rewards.rewardText.replace("{count}", Math.max(0, rewardData.rewards.threshold - (rewardData.juicesCount % rewardData.rewards.threshold)).toString())}
+                     </p>
+                     
+                     <div className="w-full h-2.5 bg-[#dce4d5] rounded-full overflow-hidden mb-3">
+                       <div className="h-full bg-[#1b4321] rounded-full transition-all duration-1000" style={{ width: `${Math.min(100, (rewardData.juicesCount % rewardData.rewards.threshold) / rewardData.rewards.threshold * 100)}%` }}></div>
+                     </div>
+                     <div className="text-[9px] font-black tracking-widest uppercase text-[#5c6359]">
+                       {rewardData.juicesCount % rewardData.rewards.threshold}/{rewardData.rewards.threshold} Juices Collected
+                     </div>
                    </div>
                  </div>
-               </div>
+               )}
 
                {/* Need Help Panel */}
                <div className="bg-[#f2f5ee] rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 shadow-sm border border-transparent">
