@@ -3,10 +3,10 @@ import mongoose, { Schema, model, models } from "mongoose";
 const UserSchema = new Schema(
   {
     fullName: { type: String, required: true },
-    phone: { type: String, required: true, unique: true },
+    phone: { type: String, unique: true, sparse: true },
     email: { type: String, required: true, unique: true },
-    deliveryAddress: { type: String, required: true },
-    password: { type: String, required: true },
+    deliveryAddress: { type: String },
+    password: { type: String },
     role: { type: String, enum: ["user", "admin"], default: "user" },
     status: { type: String, enum: ["active", "blocked"], default: "active" },
     juicesCount: { type: Number, default: 0 },

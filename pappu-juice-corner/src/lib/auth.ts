@@ -11,6 +11,7 @@ declare module "next-auth" {
       id: string;
       role: string;
       status: string;
+      isProfileIncomplete?: boolean;
     } & DefaultSession["user"]
   }
 }
@@ -20,6 +21,7 @@ declare module "next-auth/jwt" {
     id: string;
     role: string;
     status: string;
+    isProfileIncomplete?: boolean;
   }
 }
 
@@ -83,7 +85,7 @@ export const authOptions: NextAuthOptions = {
           const existingUser = await User.findOne({ email: user.email });
           
           if (!existingUser) {
-            // Create new user if they don't exist
+            // Create new partial user for Google signup
             await User.create({
               fullName: user.name,
               email: user.email,
@@ -101,14 +103,13 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user }) {
-      if (user) {
-        await connectToDatabase();
-        const dbUser = await User.findOne({ email: token.email });
-        if (dbUser) {
-          token.id = dbUser._id.toString();
-          token.role = dbUser.role;
-          token.status = dbUser.status;
-        }
+      await connectToDatabase();
+      const dbUser = await User.findOne({ email: token.email });
+      if (dbUser) {
+        token.id = dbUser._id.toString();
+        token.role = dbUser.role;
+        token.status = dbUser.status;
+        token.isProfileIncomplete = !dbUser.phone || !dbUser.deliveryAddress || !dbUser.password;
       }
       return token;
     },
@@ -117,6 +118,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
         session.user.status = token.status as string;
+        session.user.isProfileIncomplete = token.isProfileIncomplete as boolean;
       }
       return session;
     },

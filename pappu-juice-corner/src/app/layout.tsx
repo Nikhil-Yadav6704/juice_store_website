@@ -29,6 +29,8 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+import ProfileEnforcer from "@/components/ProfileEnforcer";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -43,6 +45,7 @@ export default function RootLayout({
       <body className="bg-background text-on-background font-body antialiased">
         <Providers>
           <StatusWatcher />
+          <ProfileEnforcer />
           <Navbar />
           <main className="min-h-screen pt-20">
             {children}
