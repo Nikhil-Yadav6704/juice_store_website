@@ -194,6 +194,37 @@ export default function AdminSettingsPage() {
           </div>
         </section>
 
+        {/* Shop Operational Hours */}
+        <section className="bg-white rounded-[1.5rem] p-5 md:p-8 shadow-sm border border-surface-container">
+          <div className="flex items-center gap-2 mb-6 text-on-surface">
+            <span className="material-symbols-outlined text-primary">schedule</span>
+            <h2 className="text-lg md:text-xl font-bold font-headline">Shop Operational Hours</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Opening Time (24h format, e.g. 09:00)</label>
+              <input
+                type="time"
+                value={settings.shop?.openingTime || "09:00"}
+                onChange={(e) => handleChange("shop", "openingTime", e.target.value)}
+                className="w-full bg-surface-container-lowest border border-surface-container-highest rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Closing Time (24h format, e.g. 21:00)</label>
+              <input
+                type="time"
+                value={settings.shop?.closingTime || "21:00"}
+                onChange={(e) => handleChange("shop", "closingTime", e.target.value)}
+                className="w-full bg-surface-container-lowest border border-surface-container-highest rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-on-surface-variant font-medium">
+            <span className="font-bold">Note:</span> If the shop is manually closed from the Orders dashboard, these times will be ignored.
+          </p>
+        </section>
+
         {/* Contact Settings */}
         <section className="bg-white rounded-[1.5rem] p-5 md:p-8 shadow-sm border border-surface-container">
           <div className="flex items-center gap-2 mb-6 text-on-surface">

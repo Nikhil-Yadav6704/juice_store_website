@@ -216,7 +216,7 @@ export default function MenuPage() {
                         )}
                         <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23a3f69c' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/%3E%3C/svg%3E";
+                          target.src = "https://images.unsplash.com/photo-1622597467836-f38240662c8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80";
                         }} />
                       </div>
                       <div className="p-5 sm:p-6 md:p-7 flex flex-col flex-grow bg-white">

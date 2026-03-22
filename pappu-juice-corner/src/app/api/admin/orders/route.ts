@@ -11,7 +11,10 @@ export async function GET() {
   }
 
   await connectToDatabase();
-  const orders = await Order.find().populate("userId", "fullName phone").sort({ createdAt: -1 });
+  const orders = await Order.find()
+    .populate("userId", "fullName phone email juicesCount")
+    .populate("items.productId", "imageUrl")
+    .sort({ createdAt: -1 });
 
   return NextResponse.json(orders);
 }

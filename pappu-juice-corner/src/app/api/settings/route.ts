@@ -39,6 +39,11 @@ export async function GET() {
         hourlyArrivalOffset: 2,
         instantArrivalMins: 30,
         superInstantArrivalMins: 15,
+      },
+      shop: {
+        isManualClose: false,
+        openingTime: "09:00",
+        closingTime: "21:00",
       }
     });
   }

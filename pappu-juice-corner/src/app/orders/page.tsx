@@ -118,7 +118,15 @@ export default function OrdersPage() {
                           {order.items.map((item: any, idx: number) => (
                              <div key={idx} className="bg-[#f2f5ee] rounded-xl md:rounded-2xl p-2 pr-3 md:p-2.5 md:pr-5 flex items-center gap-2 md:gap-3 min-w-0 max-w-full sm:w-[180px] md:w-[200px]">
                                 <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-lg md:rounded-xl overflow-hidden flex items-center justify-center p-1 shadow-sm flex-shrink-0">
-                                  <img src="https://images.unsplash.com/photo-1622597467836-f309a6fc430a?q=80&w=200&auto=format&fit=crop" alt="juice" className="h-full object-contain" />
+                                  <img 
+                                    src={item.productId?.imageUrl || item.imageUrl || "https://images.unsplash.com/photo-1622597467836-f38240662c8b?q=80&w=200&auto=format&fit=crop"} 
+                                    alt={item.name || "juice"} 
+                                    className="h-full object-contain" 
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      target.src = "https://images.unsplash.com/photo-1622597467836-f38240662c8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80";
+                                    }}
+                                  />
                                 </div>
                                 <div className="flex flex-col min-w-0">
                                    <span className="font-bold text-[11px] md:text-[12px] text-on-surface line-clamp-1">{item.name || "Botanical Juice"}</span>

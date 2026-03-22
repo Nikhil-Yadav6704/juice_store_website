@@ -111,6 +111,13 @@ export default function CartPage() {
   
   const totalItems = cartItems.reduce((acc: number, item: any) => acc + item.quantity, 0);
 
+  // Shop Status Logic
+  const shopSettings = settings?.shop || { isManualClose: false, openingTime: "09:00", closingTime: "21:00" };
+  const now = new Date();
+  const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+  const isInsideHours = currentTime >= shopSettings.openingTime && currentTime <= shopSettings.closingTime;
+  const isShopOpen = !shopSettings.isManualClose && isInsideHours;
+
   return (
     <div className="min-h-screen bg-[#f7faf3] px-4 sm:px-6 md:px-8 py-6 md:py-12 pt-20 md:pt-24 font-body">
       <div className="max-w-[1200px] mx-auto space-y-6 md:space-y-10">
@@ -341,15 +348,35 @@ export default function CartPage() {
 
                 <button 
                   onClick={handlePlaceOrder} 
-                  disabled={placingOrder}
-                  className="w-full bg-[#1b4321] text-white py-4 md:py-5 rounded-full font-bold shadow-lg hover:bg-primary transition-colors disabled:opacity-70 flex justify-center items-center gap-3 relative overflow-visible"
+                  disabled={placingOrder || !isShopOpen}
+                  className={`w-full py-4 md:py-5 rounded-full font-bold shadow-lg transition-colors flex justify-center items-center gap-3 relative overflow-visible ${
+                    isShopOpen 
+                    ? "bg-[#1b4321] text-white hover:bg-primary shadow-lg" 
+                    : "bg-surface-container-highest text-on-surface-variant cursor-not-allowed grayscale shadow-none"
+                  }`}
                 >
                   <span className="absolute -top-3 -right-3 w-9 h-9 md:w-10 md:h-10 bg-[#8f4e00] text-white flex items-center justify-center rounded-full border-4 border-[#e9eee5] shadow-sm transform rotate-12">
                      <span className="material-symbols-outlined text-[16px] md:text-[18px]">shopping_bag</span>
                      <span className="absolute -top-1 -right-1 bg-[#d1ecb4] text-[#005312] w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center">{totalItems}</span>
                   </span>
-                  {placingOrder ? "Processing..." : "Confirm & Place Order"}
+                  {placingOrder ? "Processing..." : !isShopOpen ? "Store Currently Closed" : "Confirm & Place Order"}
                 </button>
+                
+                {/* Opening Hours Note */}
+                <div className={`mt-4 p-4 rounded-2xl border flex flex-col items-center text-center gap-2 ${
+                  isShopOpen 
+                  ? "bg-[#f0f9ed] border-[#dce4d5] text-[#1b4321]" 
+                  : "bg-[#ffdad6] border-[#ffb4ab] text-[#ba1a1a]"
+                }`}>
+                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest">
+                    <span className="material-symbols-outlined text-[16px]">schedule</span>
+                    Opening Hours
+                  </div>
+                  <p className="text-[13px] font-medium leading-relaxed">
+                    Closed: {shopSettings.closingTime} • Opens: {shopSettings.openingTime}
+                    {!isShopOpen && <span className="block mt-1 font-bold text-[11px]">Orders will resume during these hours.</span>}
+                  </p>
+                </div>
                 
                 <div className="mt-5 md:mt-6 flex items-center justify-center gap-2 text-[10px] md:text-[11px] text-[#5c6359] font-medium">
                    <span className="material-symbols-outlined text-[#1b4321] text-[14px]">verified</span>

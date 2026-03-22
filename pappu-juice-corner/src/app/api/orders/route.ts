@@ -14,6 +14,7 @@ export async function GET() {
 
   await connectToDatabase();
   const orders = await Order.find({ userId: session.user.id })
+    .populate("items.productId", "imageUrl")
     .select("-__v")
     .sort({ createdAt: -1 });
   
@@ -36,12 +37,24 @@ export async function POST(req: Request) {
     const User = (await import("@/models/User")).default;
     
     const [settings, cart] = await Promise.all([
-      Settings.findOne().select("delivery"),
+      Settings.findOne().select("shop delivery"),
       Cart.findOne({ userId: session.user.id }).populate({
         path: "items.productId",
         select: "name price imageUrl"
       })
     ]);
+
+    // Shop Status Check
+    const shopSettings = settings?.shop || { isManualClose: false, openingTime: "09:00", closingTime: "21:00" };
+    const now = new Date();
+    // Using simple HH:mm comparison in local time
+    const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+    const isInsideHours = currentTime >= shopSettings.openingTime && currentTime <= shopSettings.closingTime;
+    const isShopOpen = !shopSettings.isManualClose && isInsideHours;
+
+    if (!isShopOpen) {
+      return NextResponse.json({ message: "Store is currently closed. We are open from " + shopSettings.openingTime + " to " + shopSettings.closingTime }, { status: 403 });
+    }
 
     if (!cart || cart.items.length === 0) {
       return NextResponse.json({ message: "Cart is empty" }, { status: 400 });
@@ -59,6 +72,7 @@ export async function POST(req: Request) {
         name: item.productId.name,
         quantity: item.quantity,
         price: item.productId.price,
+        imageUrl: item.productId.imageUrl,
         lineTotal,
       };
     });

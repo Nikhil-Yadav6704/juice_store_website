@@ -29,6 +29,11 @@ export interface ISettings extends Document {
     threshold: number;
     rewardText: string;
   };
+  shop: {
+    isManualClose: boolean;
+    openingTime: string;
+    closingTime: string;
+  };
 }
 
 const SettingsSchema: Schema = new Schema(
@@ -60,6 +65,11 @@ const SettingsSchema: Schema = new Schema(
       enabled: { type: Boolean, default: true },
       threshold: { type: Number, default: 10 },
       rewardText: { type: String, default: "You're only {count} orders away from a free seasonal tonic!" }
+    },
+    shop: {
+      isManualClose: { type: Boolean, default: false },
+      openingTime: { type: String, default: "09:00" },
+      closingTime: { type: String, default: "21:00" }
     }
   },
   { timestamps: true }

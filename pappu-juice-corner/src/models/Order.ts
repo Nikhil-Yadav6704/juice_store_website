@@ -5,6 +5,7 @@ const OrderItemSchema = new Schema({
   name: { type: String, required: true },
   quantity: { type: Number, required: true },
   price: { type: Number, required: true },
+  imageUrl: { type: String },
   lineTotal: { type: Number, required: true },
 });
 
