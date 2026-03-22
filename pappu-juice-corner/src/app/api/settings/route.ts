@@ -36,6 +36,9 @@ export async function GET() {
         instantPrice: 5.50,
         superInstantPrice: 9.00,
         taxRate: 0.02,
+        hourlyArrivalOffset: 2,
+        instantArrivalMins: 30,
+        superInstantArrivalMins: 15,
       }
     });
   }

@@ -16,6 +16,18 @@ export default function CartPage() {
   const [deliveryType, setDeliveryType] = useState("hourly");
   const [timeLeft, setTimeLeft] = useState("");
   const [placingOrder, setPlacingOrder] = useState(false);
+  // Calculate Dynamic Time Slots
+  const getDynamicSlot = () => {
+    if (!liveData?.nextBatchEnd) return "Calculating...";
+    const batchDate = new Date(liveData.nextBatchEnd);
+    return batchDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const getArrivalEstimate = (type: string) => {
+    if (type === "hourly") return `Batch closes at ${getDynamicSlot()}`;
+    if (type === "instant") return `Guaranteed dispatch at ${getDynamicSlot()}`;
+    return `Arrival: 10-15 mins`;
+  };
 
   useEffect(() => {
     if (!liveData?.nextBatchEnd) return;
@@ -103,23 +115,37 @@ export default function CartPage() {
       <div className="max-w-[1200px] mx-auto space-y-6 md:space-y-10">
         
         {/* Top Live Status Banner */}
-        <div className="bg-[#2f7831] rounded-[1.25rem] md:rounded-[1.5rem] p-3 sm:p-4 flex flex-col md:flex-row items-start md:items-center justify-between shadow-sm relative overflow-hidden gap-3 md:gap-0">
-          <div className="flex flex-wrap items-center gap-3 md:gap-4 text-white w-full md:w-auto">
-            <span className="bg-[#a3f69c] text-[#005312] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
-              Live Status
-            </span>
-            <span className="font-bold text-[13px] md:text-sm tracking-tight">{liveData?.count || 14} Active deliveries in your area</span>
+        <div className="bg-[#2f7831] rounded-[1.25rem] md:rounded-[1.5rem] p-4 sm:p-5 flex flex-col shadow-sm relative overflow-hidden gap-3">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+             <div className="flex flex-col gap-1">
+               <div className="flex items-center gap-2">
+                 <span className="bg-[#a3f69c] text-[#005312] px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
+                   Live Batch
+                 </span>
+                 <span className="font-bold text-[14px] md:text-base text-white tracking-tight">
+                   {liveData?.count || 0} / 5 Orders Reached
+                 </span>
+               </div>
+               <p className="text-[11px] md:text-xs text-[#c8d4c3] font-medium max-w-md">
+                 Hourly free batches require 5 orders to dispatch. If not reached, orders roll over to the next hour.
+               </p>
+             </div>
+             
+             <div className="bg-black/20 text-white flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-[13px] md:text-sm border border-white/10 w-full md:w-auto justify-center">
+               <span className="material-symbols-outlined text-[16px]">hourglass_empty</span>
+               Batch Closes In: {timeLeft || "00:00"}
+             </div>
           </div>
-          
-          <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto justify-between md:justify-end">
-            <div className="hidden md:flex flex-col items-end border-r border-white/20 pr-6 mr-2">
-               <span className="text-[9px] uppercase tracking-widest text-[#c8d4c3] font-bold">Estimated Slot</span>
-               <span className="font-headline font-bold text-white text-lg tracking-tight">14:20 - 14:45</span>
-            </div>
-            <div className="bg-black/20 text-white flex items-center gap-2 px-3 md:px-4 py-2 rounded-full font-bold text-[13px] md:text-sm border border-white/10">
-              <span className="material-symbols-outlined text-[14px] md:text-[16px]">schedule</span>
-              Expires in {timeLeft || "08:52"}
-            </div>
+
+          {/* Progress Bar */}
+          <div className="w-full bg-black/20 rounded-full h-2 md:h-2.5 mt-2 border border-white/10 overflow-hidden relative">
+            <div 
+              className={`h-full rounded-full transition-all duration-1000 ${((liveData?.count || 0) >= 5) ? 'bg-[#a3f69c]' : 'bg-[#fbdfc6]'}`}
+              style={{ width: `${Math.min(((liveData?.count || 0) / 5) * 100, 100)}%` }}
+            ></div>
+            {((liveData?.count || 0) >= 5) && (
+              <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+            )}
           </div>
         </div>
 
@@ -215,56 +241,71 @@ export default function CartPage() {
             {/* Right Column - Order Summary & Delivery */}
             <div className="md:col-span-5 space-y-4 md:space-y-6">
               
-              {/* Delivery Speed */}
+              {/* Delivery Tier Selection */}
               <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-8 shadow-sm border border-surface-container">
-                <h3 className="text-lg md:text-xl font-bold font-headline mb-4 md:mb-6 tracking-tight text-on-surface">Delivery Speed</h3>
+                <h3 className="text-lg md:text-xl font-bold font-headline mb-4 md:mb-6 tracking-tight text-on-surface">Delivery Tier</h3>
                 <div className="space-y-3 md:space-y-4">
                   
-                  <label className={`flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${deliveryType === "hourly" ? "border-primary bg-[#f0f9ed]" : "border-surface-container hover:border-outline-variant"}`}>
-                    <div className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 flex items-center justify-center">
+                  <label className={`flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${deliveryType === "hourly" ? "border-primary bg-[#f0f9ed]" : "border-surface-container hover:border-outline-variant"}`}>
+                    <div className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 flex items-center justify-center mt-1">
                        <input type="radio" value="hourly" checked={deliveryType === "hourly"} onChange={() => setDeliveryType("hourly")} className="w-4 h-4 text-primary accent-primary" />
                     </div>
-                    <div className="w-9 h-9 md:w-10 md:h-10 bg-[#e4ebdd] rounded-full flex items-center justify-center flex-shrink-0 text-primary">
-                       <span className="material-symbols-outlined text-[16px] md:text-[18px]">schedule</span>
+                    <div className="w-9 h-9 md:w-10 md:h-10 bg-[#e4ebdd] rounded-full flex items-center justify-center flex-shrink-0 text-primary mt-1">
+                       <span className="material-symbols-outlined text-[16px] md:text-[18px]">group</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center mb-0.5">
-                        <h4 className="font-bold text-[13px] md:text-[14px] text-on-surface">Free (Hourly)</h4>
+                      <div className="flex justify-between items-start mb-0.5">
+                        <div>
+                           <h4 className="font-bold text-[13px] md:text-[14px] text-on-surface">Tier 1: Hourly Batch</h4>
+                           <p className="text-[11px] font-bold text-[#1b4321]">{getArrivalEstimate("hourly")}</p>
+                        </div>
                         <span className="font-bold text-[#1b4321] text-[13px] md:text-sm">Free</span>
                       </div>
-                      <p className="text-[10px] md:text-[11px] text-[#5c6359] font-medium">Arrival: 15:00 - 16:00</p>
+                      <p className="text-[10px] md:text-[11px] text-[#5c6359] font-medium mt-1.5 leading-relaxed">
+                        Waits for the current hour to close. Requires a 5-order minimum across all customers to dispatch. If not met, rolls over to the next hour.
+                      </p>
                     </div>
                   </label>
 
-                  <label className={`flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${deliveryType === "instant" ? "border-primary bg-[#f0f9ed]" : "border-surface-container hover:border-outline-variant"}`}>
-                    <div className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 flex items-center justify-center">
+                  <label className={`flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${deliveryType === "instant" ? "border-primary bg-[#f0f9ed]" : "border-surface-container hover:border-outline-variant"}`}>
+                    <div className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 flex items-center justify-center mt-1">
                        <input type="radio" value="instant" checked={deliveryType === "instant"} onChange={() => setDeliveryType("instant")} className="w-4 h-4 text-primary accent-primary" />
                     </div>
-                    <div className="w-9 h-9 md:w-10 md:h-10 bg-[#fbdfc6] rounded-full flex items-center justify-center flex-shrink-0 text-[#8f4e00]">
+                    <div className="w-9 h-9 md:w-10 md:h-10 bg-[#fbdfc6] rounded-full flex items-center justify-center flex-shrink-0 text-[#8f4e00] mt-1">
                        <span className="material-symbols-outlined text-[16px] md:text-[18px]">bolt</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center mb-0.5">
-                        <h4 className="font-bold text-[13px] md:text-[14px] text-on-surface">Instant Delivery</h4>
+                      <div className="flex justify-between items-start mb-0.5">
+                        <div>
+                          <h4 className="font-bold text-[13px] md:text-[14px] text-on-surface">Tier 2: Instant Guarantee</h4>
+                          <p className="text-[11px] font-bold text-[#8f4e00]">{getArrivalEstimate("instant")}</p>
+                        </div>
                         <span className="font-bold text-on-surface text-[13px] md:text-sm">₹{instantPrice.toFixed(2)}</span>
                       </div>
-                      <p className="text-[10px] md:text-[11px] text-[#5c6359] font-medium">Arrival: 20-30 mins</p>
+                      <p className="text-[10px] md:text-[11px] text-[#5c6359] font-medium mt-1.5 leading-relaxed">
+                        Still waits for the batch to close, but <strong>bypasses the 5-order minimum</strong>. Ensures yours (and everyone else's in the batch) goes out immediately when the timer ends.
+                      </p>
                     </div>
                   </label>
 
-                  <label className={`flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${deliveryType === "super_instant" ? "border-primary bg-[#f0f9ed]" : "border-surface-container hover:border-outline-variant"}`}>
-                    <div className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 flex items-center justify-center">
+                  <label className={`flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${deliveryType === "super_instant" ? "border-primary bg-[#f0f9ed]" : "border-surface-container hover:border-outline-variant"}`}>
+                    <div className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 flex items-center justify-center mt-1">
                        <input type="radio" value="super_instant" checked={deliveryType === "super_instant"} onChange={() => setDeliveryType("super_instant")} className="w-4 h-4 text-primary accent-primary" />
                     </div>
-                    <div className="w-9 h-9 md:w-10 md:h-10 bg-[#a3f69c] rounded-full flex items-center justify-center flex-shrink-0 text-[#005312]">
+                    <div className="w-9 h-9 md:w-10 md:h-10 bg-[#a3f69c] rounded-full flex items-center justify-center flex-shrink-0 text-[#005312] mt-1">
                        <span className="material-symbols-outlined text-[16px] md:text-[18px]">rocket_launch</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center mb-0.5">
-                        <h4 className="font-bold text-[13px] md:text-[14px] text-on-surface">Super Instant</h4>
+                      <div className="flex justify-between items-start mb-0.5">
+                        <div>
+                          <h4 className="font-bold text-[13px] md:text-[14px] text-on-surface">Tier 3: Super Instant</h4>
+                          <p className="text-[11px] font-bold text-[#005312]">{getArrivalEstimate("super_instant")}</p>
+                        </div>
                         <span className="font-bold text-on-surface text-[13px] md:text-sm">₹{superInstantPrice.toFixed(2)}</span>
                       </div>
-                      <p className="text-[10px] md:text-[11px] text-[#5c6359] font-medium">Arrival: 10-15 mins</p>
+                      <p className="text-[10px] md:text-[11px] text-[#5c6359] font-medium mt-1.5 leading-relaxed">
+                        Skips the batch entirely. Your juice is made exclusively and delivered immediately in 10-15 minutes. Independent lane priority.
+                      </p>
                     </div>
                   </label>
 

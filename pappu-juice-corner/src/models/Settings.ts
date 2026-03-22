@@ -20,6 +20,9 @@ export interface ISettings extends Document {
     instantPrice: number;
     superInstantPrice: number;
     taxRate: number;
+    hourlyArrivalOffset: number;
+    instantArrivalMins: number;
+    superInstantArrivalMins: number;
   };
   rewards: {
     enabled: boolean;
@@ -48,7 +51,10 @@ const SettingsSchema: Schema = new Schema(
     delivery: {
       instantPrice: { type: Number, default: 5.50 },
       superInstantPrice: { type: Number, default: 9.00 },
-      taxRate: { type: Number, default: 0.02 }
+      taxRate: { type: Number, default: 0.02 },
+      hourlyArrivalOffset: { type: Number, default: 2 },
+      instantArrivalMins: { type: Number, default: 30 },
+      superInstantArrivalMins: { type: Number, default: 15 }
     },
     rewards: {
       enabled: { type: Boolean, default: true },
