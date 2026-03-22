@@ -80,7 +80,10 @@ export default function OrdersPage() {
             <div className="flex-shrink-0">
                <div className="bg-white text-on-surface px-4 md:px-6 py-2.5 md:py-3.5 rounded-full font-bold text-[12px] md:text-[13px] flex items-center gap-2 shadow-sm w-fit">
                  <span className="material-symbols-outlined text-[#185324] text-[16px] md:text-[18px]">info</span>
-                 STATUS: {liveData?.count > 0 ? "PREPARING" : "READY"}
+                 STATUS: {activeOrders.length === 0 ? "IDLE" : 
+                          activeOrders.some((o: any) => o.status === "Out for Delivery") ? "IN TRANSIT" : 
+                          activeOrders.some((o: any) => o.status === "Preparing") ? "PREPARING" : 
+                          "PENDING"}
                </div>
             </div>
 
@@ -147,14 +150,25 @@ export default function OrdersPage() {
                         {/* Order Timeline Map Bottom */}
                         <div className="pt-4 md:pt-6 border-t border-surface-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 md:gap-6">
                            <div className="flex items-center gap-2">
+                              {/* Step 1: Placed (Always active if not cancelled) */}
                               <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#d1ecb4] text-[#005312] flex items-center justify-center"><span className="material-symbols-outlined text-[12px] md:text-[14px]">done</span></div>
-                              <div className="w-3 md:w-4 h-px bg-[#d1ecb4]"></div>
-                              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#d1ecb4] text-[#005312] flex items-center justify-center"><span className="material-symbols-outlined text-[12px] md:text-[14px]">restaurant</span></div>
-                              <div className="w-3 md:w-4 h-px bg-surface-container-high"></div>
-                              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#e4ebdd] text-[#5c6359] flex items-center justify-center"><span className="material-symbols-outlined text-[12px] md:text-[14px]">local_shipping</span></div>
+                              
+                              <div className={`w-3 md:w-4 h-px ${['Preparing', 'Out for Delivery', 'Delivered'].includes(order.status) ? 'bg-[#d1ecb4]' : 'bg-surface-container-high'}`}></div>
+                              
+                              {/* Step 2: Preparing */}
+                              <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center ${['Preparing', 'Out for Delivery', 'Delivered'].includes(order.status) ? 'bg-[#d1ecb4] text-[#005312]' : 'bg-[#e4ebdd] text-[#5c6359]'}`}><span className="material-symbols-outlined text-[12px] md:text-[14px]">restaurant</span></div>
+                              
+                              <div className={`w-3 md:w-4 h-px ${['Out for Delivery', 'Delivered'].includes(order.status) ? 'bg-[#d1ecb4]' : 'bg-surface-container-high'}`}></div>
+                              
+                              {/* Step 3: Out for Delivery */}
+                              <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center ${['Out for Delivery', 'Delivered'].includes(order.status) ? 'bg-[#d1ecb4] text-[#005312]' : 'bg-[#e4ebdd] text-[#5c6359]'}`}><span className="material-symbols-outlined text-[12px] md:text-[14px]">local_shipping</span></div>
                            </div>
                            
-                           <button onClick={() => toast.error("Cancellation is unavailable after prep has started.")} className="text-[#ba1a1a] font-bold text-[13px] hover:underline transition-all">Cancel Order</button>
+                           {order.status === "Pending" ? (
+                             <button onClick={() => toast.error("Cancellation currently not supported here.")} className="text-[#ba1a1a] font-bold text-[13px] hover:underline transition-all">Cancel Order</button>
+                           ) : (
+                             <span className="text-[#5c6359] font-medium text-[12px]">Cannot cancel once prep starts</span>
+                           )}
                         </div>
                       </div>
                     ))}
