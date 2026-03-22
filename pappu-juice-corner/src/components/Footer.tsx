@@ -1,6 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Hide the global footer on Admin and Auth routes where custom navigation exists or clean UI is needed
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/auth")) {
+    return null;
+  }
+
   return (
     <footer className="w-full py-8 md:py-12 px-4 sm:px-6 md:px-8 mt-12 md:mt-20 bg-[#ecefe8] dark:bg-stone-900">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-7xl mx-auto">
@@ -32,7 +42,7 @@ export default function Footer() {
               <span className="material-symbols-outlined text-sm">east</span>
             </button>
           </div>
-          <p className="text-xs text-[#40493d] mt-2 md:mt-4 font-['Manrope'] leading-relaxed">© {new Date().getFullYear()} Pappu Juice Corner. Stay Organic.</p>
+          <p className="text-[11px] text-[#40493d] mt-4 md:mt-4 font-['Manrope'] leading-relaxed text-center md:text-left">© {new Date().getFullYear()} Pappu Juice Corner. <br className="md:hidden"/> Stay Organic.</p>
         </div>
       </div>
     </footer>

@@ -108,8 +108,8 @@ export default function SignupPage() {
       <div className="absolute top-[20%] right-[10%] w-[150px] h-[150px] bg-[#fbdfc6] rounded-3xl transform rotate-12 opacity-80 z-0 pointer-events-none hidden lg:block"></div>
 
       {/* Global Navbar */}
-      <nav className="relative z-20 w-full px-8 py-6 flex justify-between items-center bg-transparent">
-        <Link href="/" className="text-3xl font-extrabold text-primary font-headline tracking-tighter hover:opacity-80 transition-opacity">
+      <nav className="relative z-20 w-full px-6 md:px-8 py-4 md:py-6 flex justify-between items-center bg-transparent">
+        <Link href="/" className="text-xl md:text-3xl font-extrabold text-primary font-headline tracking-tighter hover:opacity-80 transition-opacity">
           Pappu Juice Corner
         </Link>
         <div className="hidden md:flex gap-10 font-medium text-sm text-on-surface-variant">
@@ -117,9 +117,9 @@ export default function SignupPage() {
           <Link href="/menu" className="hover:text-primary transition-colors">Juices</Link>
           <Link href="/our-story" className="hover:text-primary transition-colors">Our Story</Link>
         </div>
-        <div className="flex items-center gap-6 text-sm font-bold">
-          <Link href="/auth/login" className="text-on-surface hover:text-primary transition-colors">Login</Link>
-          <Link href="/auth/signup" className="bg-primary text-on-primary px-6 py-2.5 rounded-full shadow-md hover:shadow-lg hover:bg-[#0a4d15] transition-all">Sign Up</Link>
+        <div className="flex items-center gap-4 md:gap-6 text-sm font-bold">
+          <Link href="/auth/login" className="text-on-surface hover:text-primary transition-colors text-xs md:text-sm">Login</Link>
+          <Link href="/auth/signup" className="bg-primary text-on-primary px-4 md:px-6 py-2 md:py-2.5 rounded-full shadow-md hover:shadow-lg hover:bg-[#0a4d15] transition-all text-xs md:text-sm">Sign Up</Link>
         </div>
       </nav>
 
@@ -134,11 +134,11 @@ export default function SignupPage() {
             <span className="bg-[#52634f] text-white text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-6 inline-block shadow-sm">
               Member Atelier
             </span>
-            <h1 className="text-6xl md:text-[5rem] font-extrabold text-on-surface font-headline leading-[1.1] tracking-tight mb-6">
-              Join the <br/>
+            <h1 className="text-4xl md:text-[5rem] font-extrabold text-on-surface font-headline leading-[1.1] tracking-tight mb-6">
+              Join the <br className="hidden md:block"/>
               <span className="text-primary italic font-serif opacity-90">harvest.</span>
             </h1>
-            <p className="text-lg text-on-surface-variant font-medium leading-relaxed mb-10 max-w-md">
+            <p className="text-base md:text-lg text-on-surface-variant font-medium leading-relaxed mb-10 max-w-md">
               Access seasonal blends, botanical insights, and doorstep vitality. Our digital orchard is cultivated for those who seek the refined essence of nature.
             </p>
 
@@ -201,9 +201,9 @@ export default function SignupPage() {
               <div className="space-y-6">
                 <div className="relative">
                   <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Email Address</label>
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                     <input type="email" name="email" value={formData.email} onChange={handleChange} required className="flex-1 px-5 py-4 rounded-xl bg-[#f2f5ee] border-none text-on-surface focus:ring-2 focus:ring-primary/20 outline-none transition-shadow placeholder:text-on-surface-variant/50 font-medium" placeholder="julian@atelier.com" />
-                    <button type="button" onClick={handleSendOtp} disabled={sendingOtp || otpSent} className="px-6 rounded-xl bg-surface-container-high text-on-surface font-bold text-xs hover:bg-surface-container-highest transition-colors disabled:opacity-50">
+                    <button type="button" onClick={handleSendOtp} disabled={sendingOtp || otpSent} className="w-full sm:w-auto px-6 py-4 sm:py-0 rounded-xl bg-surface-container-high text-on-surface font-bold text-xs hover:bg-surface-container-highest transition-colors disabled:opacity-50 whitespace-nowrap">
                       {sendingOtp ? "Sending..." : otpSent ? "Sent" : "Send OTP"}
                     </button>
                   </div>
@@ -255,47 +255,6 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* Global Footer (Extended Version for Signup) */}
-      <footer className="relative z-10 w-full bg-[#ebeee7] border-t border-[#dce0d7] pt-16 pb-8 mt-12">
-        <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="md:col-span-1">
-            <h3 className="text-2xl font-extrabold text-primary font-headline tracking-tighter mb-4">Pappu Juice Corner</h3>
-            <p className="text-sm text-on-surface-variant leading-relaxed opacity-90">
-              Cultivating high-end vitality through botanical wisdom and fresh-pressed excellence.
-            </p>
-          </div>
-          <div>
-            <h4 className="text-[10px] font-bold text-on-surface uppercase tracking-widest mb-6">Navigation</h4>
-            <ul className="space-y-4 text-sm font-medium text-on-surface-variant">
-              <li><Link href="/about" className="hover:text-primary transition-colors">About Us</Link></li>
-              <li><Link href="/sourcing" className="hover:text-primary transition-colors">Sourcing</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-[10px] font-bold text-on-surface uppercase tracking-widest mb-6">Policy</h4>
-            <ul className="space-y-4 text-sm font-medium text-on-surface-variant">
-              <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link></li>
-              <li><Link href="/shipping" className="hover:text-primary transition-colors">Shipping</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-[10px] font-bold text-on-surface uppercase tracking-widest mb-6">Connect</h4>
-            <ul className="space-y-4 text-sm font-medium text-on-surface-variant">
-              <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
-            </ul>
-          </div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center border-t border-outline-variant/20 pt-8">
-          <p className="text-xs text-on-surface-variant/80 font-medium">© 2024 Pappu Juice Corner Editorial. All rights reserved.</p>
-          <div className="flex gap-4 mt-4 md:mt-0 text-on-surface-variant">
-            {/* Social Icons Placeholders */}
-            <span className="material-symbols-outlined text-[18px] hover:text-primary cursor-pointer transition-colors">campaign</span>
-            <span className="material-symbols-outlined text-[18px] hover:text-primary cursor-pointer transition-colors">eco</span>
-            <span className="material-symbols-outlined text-[18px] hover:text-primary cursor-pointer transition-colors">public</span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

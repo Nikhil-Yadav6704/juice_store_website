@@ -42,9 +42,9 @@ export default function Home() {
               />
             </div>
             
-            <div className="absolute -bottom-6 -left-2 sm:-bottom-10 sm:-left-6 md:-left-16 w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 bg-surface-container-lowest rounded-2xl md:rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.08)] flex flex-col justify-center items-center text-center p-4 md:p-6 border border-white/50 z-20">
-              <span className="text-[#8f4e00] font-headline font-black text-3xl sm:text-4xl md:text-5xl tracking-tighter leading-none mb-1">100%</span>
-              <span className="text-on-surface-variant text-[8px] md:text-[9px] font-black uppercase tracking-widest mt-1">Organic Traceability</span>
+            <div className="absolute -bottom-4 -left-2 sm:-bottom-10 sm:-left-6 md:-left-16 w-28 h-28 sm:w-40 sm:h-40 md:w-48 md:h-48 bg-surface-container-lowest rounded-2xl md:rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.08)] flex flex-col justify-center items-center text-center p-3 md:p-6 border border-white/50 z-20">
+              <span className="text-[#8f4e00] font-headline font-black text-2xl sm:text-4xl md:text-5xl tracking-tighter leading-none mb-1">100%</span>
+              <span className="text-on-surface-variant text-[7px] md:text-[9px] font-black uppercase tracking-widest mt-1">Organic Traceability</span>
             </div>
           </div>
         </div>

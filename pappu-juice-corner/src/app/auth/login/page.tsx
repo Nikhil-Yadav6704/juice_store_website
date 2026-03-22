@@ -46,14 +46,30 @@ export default function LoginPage() {
       <div className="absolute top-0 left-0 w-[20vw] max-w-[300px] aspect-square bg-gradient-to-br from-[#d1ecb4] to-transparent rounded-br-full opacity-60 pointer-events-none hidden md:block"></div>
       <div className="absolute bottom-0 right-0 w-[25vw] max-w-[400px] aspect-square bg-gradient-to-tl from-[#ffe5cc] to-transparent rounded-tl-full opacity-60 pointer-events-none hidden md:block"></div>
 
+      {/* Global Navbar */}
+      <nav className="relative z-20 w-full px-6 md:px-8 py-4 md:py-6 flex justify-between items-center bg-transparent">
+        <Link href="/" className="text-xl md:text-3xl font-extrabold text-primary font-headline tracking-tighter hover:opacity-80 transition-opacity">
+          Pappu Juice Corner
+        </Link>
+        <div className="hidden md:flex gap-10 font-medium text-sm text-on-surface-variant">
+          <Link href="/menu" className="hover:text-primary transition-colors">Menu</Link>
+          <Link href="/menu" className="hover:text-primary transition-colors">Juices</Link>
+          <Link href="/our-story" className="hover:text-primary transition-colors">Our Story</Link>
+        </div>
+        <div className="flex items-center gap-4 md:gap-6 text-sm font-bold">
+          <Link href="/auth/login" className="text-on-surface hover:text-primary transition-colors text-xs md:text-sm">Login</Link>
+          <Link href="/auth/signup" className="bg-primary text-on-primary px-4 md:px-6 py-2 md:py-2.5 rounded-full shadow-md hover:shadow-lg hover:bg-[#0a4d15] transition-all text-xs md:text-sm whitespace-nowrap">Sign Up</Link>
+        </div>
+      </nav>
+
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 md:py-12 z-10">
         
         {/* Header Titles */}
-        <div className="text-center mb-10">
-          <h1 className="text-5xl md:text-6xl font-extrabold text-primary font-headline tracking-tighter mb-2">
+        <div className="text-center mb-8 md:mb-10 px-4">
+          <h1 className="text-4xl md:text-6xl font-extrabold text-primary font-headline tracking-tighter mb-2 leading-tight">
             Pappu Juice Corner
           </h1>
-          <p className="text-on-surface-variant font-medium">
+          <p className="text-sm md:text-base text-on-surface-variant font-medium opacity-80">
             Step into the Atelier of Vitality.
           </p>
         </div>
@@ -198,20 +214,6 @@ export default function LoginPage() {
 
       </div>
 
-      {/* Global Footer Minimal */}
-      <footer className="w-full px-8 py-6 flex flex-col md:flex-row justify-between items-center border-t border-surface-container z-10 bg-surface/80 backdrop-blur-md">
-        <div className="font-headline font-extrabold text-primary text-lg mb-4 md:mb-0 tracking-tight">
-          Pappu Juice Corner Editorial
-        </div>
-        <div className="flex gap-8 text-xs font-medium text-on-surface-variant">
-          <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-          <a href="#" className="hover:text-primary transition-colors">Contact Support</a>
-        </div>
-        <div className="text-xs text-on-surface-variant mt-4 md:mt-0">
-          © 2024 Pappu Juice Corner. All rights reserved.
-        </div>
-      </footer>
     </div>
   );
 }

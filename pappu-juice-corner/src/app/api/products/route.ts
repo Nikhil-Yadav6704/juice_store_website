@@ -18,7 +18,7 @@ const SEED_PRODUCTS = [
     category: "Detox",
     description: "Kale, spinach, celery, green apple, cucumber, and parsley. The ultimate alkaline reset.",
     price: 400,
-    imageUrl: "https://images.unsplash.com/photo-1622484213759-42b3687be69d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=500&q=80",
     isVisible: true,
   },
   {

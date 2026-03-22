@@ -1,10 +1,22 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend: Resend | null = null;
+
+const getResend = () => {
+  if (!resend) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error("CRITICAL: RESEND_API_KEY is missing from environment variables.");
+    }
+    resend = new Resend(apiKey);
+  }
+  return resend;
+};
 
 export const sendOtpEmail = async (email: string, otp: string) => {
   try {
-    const { data, error } = await resend.emails.send({
+    const resendInstance = getResend();
+    const { data, error } = await resendInstance.emails.send({
       from: "Orchard <onboarding@resend.dev>", // Replace with verified domain in production
       to: [email],
       subject: "Your Verification Code - Pappu Juice Corner",

@@ -157,7 +157,7 @@ export default function MenuPage() {
             Explore our curated selection of cold-pressed botanicals, designed to nourish and revitalize. From orchard to glass, no shortcuts.
           </p>
         </div>
-        <div className="hidden md:flex w-64 h-64 rounded-full border border-surface-container-high bg-surface-container-lowest items-center justify-center relative shadow-sm">
+        <div className="hidden lg:flex w-64 h-64 rounded-full border border-surface-container-high bg-surface-container-lowest items-center justify-center relative shadow-sm">
           <div className="absolute inset-0 flex items-center justify-center">
              <span className="text-[9px] font-black text-[#5c6359] uppercase tracking-widest text-center max-w-[100px] leading-relaxed">Pure Organic <br/>Cold Pressed</span>
           </div>
@@ -165,22 +165,24 @@ export default function MenuPage() {
       </section>
 
       {/* Category Pills — horizontally scrollable on mobile */}
-      <div className="px-4 sm:px-6 md:px-8 max-w-6xl mx-auto mb-10 md:mb-16">
-        <div className="flex gap-2 md:gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+      <div className="px-0 sm:px-6 md:px-8 max-w-6xl mx-auto mb-8 md:mb-16 relative">
+        <div className="flex gap-2.5 md:gap-3 overflow-x-auto pb-4 scrollbar-hide px-4 sm:px-0 mask-fade-right">
           {categoryTabs.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-5 md:px-6 py-2 md:py-2.5 rounded-full text-[12px] md:text-[13px] font-bold transition-all shadow-sm border border-transparent whitespace-nowrap flex-shrink-0 ${
+              className={`px-5 md:px-6 py-2.5 rounded-full text-[12px] md:text-[13px] font-bold transition-all shadow-sm border whitespace-nowrap flex-shrink-0 ${
                 selectedCategory === cat
-                  ? "bg-[#a3f69c] text-[#005312] border-[#7a9d70]/30"
-                  : "bg-surface-container-lowest text-on-surface-variant hover:border-outline-variant hover:text-on-surface"
+                  ? "bg-primary text-white border-primary shadow-md"
+                  : "bg-surface-container-lowest text-on-surface-variant border-surface-container hover:border-primary/30 hover:text-primary"
               }`}
             >
               {cat}
             </button>
           ))}
         </div>
+        {/* Mobile Scroll Indicator Fade */}
+        <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-surface to-transparent pointer-events-none md:hidden" />
       </div>
 
       {/* Products */}
@@ -212,9 +214,12 @@ export default function MenuPage() {
                         {!product.isVisible && (
                           <div className="absolute top-4 left-4 bg-red-100 text-red-700 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm z-10">Hidden</div>
                         )}
-                        <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23a3f69c' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/%3E%3C/svg%3E";
+                        }} />
                       </div>
-                      <div className="p-5 md:p-7 flex flex-col flex-grow bg-white">
+                      <div className="p-5 sm:p-6 md:p-7 flex flex-col flex-grow bg-white">
                         <h3 className="text-[15px] md:text-[17px] font-bold font-headline text-on-surface mb-1.5 md:mb-2">{product.name}</h3>
                         <p className="text-[12px] md:text-[13px] text-on-surface-variant leading-relaxed mb-4 md:mb-5 font-medium flex-grow line-clamp-3">{product.description}</p>
                         <div className="flex items-center justify-between mt-auto">

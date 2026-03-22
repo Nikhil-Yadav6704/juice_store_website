@@ -29,11 +29,14 @@ export async function POST(req: Request) {
 
     // Send email via Resend
     const result = await sendOtpEmail(email, otp);
-
+    
     if (!result.success) {
-        // If Resend fails, we still returned success if it's a dev environment or something?
-        // Actually, for now let's be strict.
-        return NextResponse.json({ message: "Failed to send email. Check API key." }, { status: 500 });
+      const errorMessage = (result.error as any)?.message || "Failed to send email. Check API key.";
+      console.error("OTP Email Failure Details:", result.error);
+      return NextResponse.json({ 
+        message: errorMessage,
+        error: result.error 
+      }, { status: 500 });
     }
 
     return NextResponse.json({ message: "OTP sent successfully" });

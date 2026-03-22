@@ -30,6 +30,7 @@ export const metadata: Metadata = {
 };
 
 import ProfileEnforcer from "@/components/ProfileEnforcer";
+import PageWrapper from "@/components/PageWrapper";
 
 export default function RootLayout({
   children,
@@ -47,9 +48,9 @@ export default function RootLayout({
           <StatusWatcher />
           <ProfileEnforcer />
           <Navbar />
-          <main className="min-h-screen pt-20">
+          <PageWrapper>
             {children}
-          </main>
+          </PageWrapper>
           <Footer />
           <FloatingCart />
         </Providers>

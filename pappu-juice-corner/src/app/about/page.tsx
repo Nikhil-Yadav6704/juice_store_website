@@ -208,51 +208,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-emerald-900 w-full pt-12 md:pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-sm leading-relaxed text-emerald-50">
-          <div className="col-span-2 md:col-span-1">
-            <span className="text-xl font-bold text-emerald-50 mb-4 block italic" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>Pappu Juice Corner</span>
-            <p className="text-emerald-200/60 leading-relaxed mb-6">
-              A curated wellness destination committed to the organic beauty of nature.
-            </p>
-            <div className="flex gap-4">
-              <span className="material-symbols-outlined text-emerald-200/60 hover:text-amber-500 cursor-pointer transition-colors">eco</span>
-              <span className="material-symbols-outlined text-emerald-200/60 hover:text-amber-500 cursor-pointer transition-colors">spa</span>
-              <span className="material-symbols-outlined text-emerald-200/60 hover:text-amber-500 cursor-pointer transition-colors">nutrition</span>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-bold text-emerald-50 mb-4 md:mb-6 uppercase tracking-widest text-xs">Explore</h4>
-            <ul className="space-y-3 md:space-y-4 text-emerald-200/60">
-              <li><Link href="/menu" className="hover:text-amber-500 transition-colors">Our Menu</Link></li>
-              <li><Link href="/menu" className="hover:text-amber-500 transition-colors">Juice Cleanses</Link></li>
-              <li><Link href="/menu" className="hover:text-amber-500 transition-colors">Wellness Shop</Link></li>
-              <li><Link href="/menu" className="hover:text-amber-500 transition-colors">Wholesale</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold text-emerald-50 mb-4 md:mb-6 uppercase tracking-widest text-xs">Company</h4>
-            <ul className="space-y-3 md:space-y-4 text-emerald-200/60">
-              <li><Link href="/about" className="hover:text-amber-500 transition-colors">Sustainability</Link></li>
-              <li><Link href="/about" className="hover:text-amber-500 transition-colors">Press</Link></li>
-              <li><Link href="/about" className="hover:text-amber-500 transition-colors">Careers</Link></li>
-              <li><Link href="/about" className="hover:text-amber-500 transition-colors">Privacy Policy</Link></li>
-            </ul>
-          </div>
-          <div className="col-span-2 md:col-span-1">
-            <h4 className="font-bold text-emerald-50 mb-4 md:mb-6 uppercase tracking-widest text-xs">Visit</h4>
-            <ul className="space-y-3 md:space-y-4 text-emerald-200/60">
-              <li>120 Orchard Lane</li>
-              <li>Somerset, UK</li>
-              <li>hello@theorchard.com</li>
-            </ul>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-12 md:mt-16 pt-6 md:pt-8 border-t border-emerald-800 text-center md:text-left">
-          <p className="text-emerald-200/40 text-xs">© 2024 Pappu Juice Corner Editorial. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }

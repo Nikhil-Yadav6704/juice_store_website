@@ -117,3 +117,9 @@ html {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Fade effect for horizontal scrollers to indicate more content */
+.mask-fade-right {
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
