@@ -10,9 +10,15 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function CartPage() {
   const router = useRouter();
-  const { data: cartData, mutate: mutateCart, isLoading } = useSWR("/api/cart", fetcher, { dedupingInterval: 60000 });
-  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000, dedupingInterval: 5000 });
+  const { data: session } = useSWR("/api/auth/session", fetcher);
+  const { data: cartData, mutate: mutateCart, isLoading } = useSWR(
+    session?.user ? ["/api/cart", session.user.id] : null, 
+    fetcher, 
+    { dedupingInterval: 500, revalidateOnFocus: true, revalidateOnMount: true }
+  );
+  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000, dedupingInterval: 2000 });
   const { data: settings } = useSWR("/api/settings", fetcher, { dedupingInterval: 300000, revalidateOnFocus: false });
+  const { data: allProducts } = useSWR("/api/products", fetcher);
   
   const [deliveryType, setDeliveryType] = useState("hourly");
   const [placingOrder, setPlacingOrder] = useState(false);
@@ -141,7 +147,7 @@ export default function CartPage() {
              
              <div className="bg-black/20 text-white flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-[13px] md:text-sm border border-white/10 w-full md:w-auto justify-center">
                <span className="material-symbols-outlined text-[16px]">hourglass_empty</span>
-               Batch Closes In: {liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} /> : "00:00"}
+               Batch Closes In: {isShopOpen && liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} /> : "00:00"}
              </div>
           </div>
 
@@ -154,7 +160,13 @@ export default function CartPage() {
             {((liveData?.count || 0) >= 5) && (
               <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
             )}
-          </div>
+           </div>
+          {!isShopOpen && (
+            <div className="text-[10px] md:text-[11px] text-[#ffdad6] font-bold mt-2 uppercase tracking-widest flex items-center gap-1.5 px-1 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ffb4ab]"></span>
+              Batch counting paused: Store is currently closed
+            </div>
+          )}
         </div>
 
         {isEmpty ? (
@@ -219,30 +231,44 @@ export default function CartPage() {
               </div>
 
               {/* Ritual Upsell */}
-              <div className="bg-[#e9eee5] rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-8 border border-[#dce4d5] mt-6 md:mt-8 overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#d1ecb4] blur-3xl opacity-50 rounded-full mix-blend-multiply"></div>
-                <div className="relative z-10 flex items-center gap-2 mb-4 md:mb-6 text-on-surface">
-                   <span className="material-symbols-outlined text-[#8f4e00]">eco</span>
-                   <h3 className="text-lg md:text-xl font-bold font-headline tracking-tight">Complete Your Ritual</h3>
+              {allProducts && allProducts.length > 0 && (
+                <div className="bg-[#e9eee5] rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-8 border border-[#dce4d5] mt-6 md:mt-8 overflow-hidden relative">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#d1ecb4] blur-3xl opacity-50 rounded-full mix-blend-multiply"></div>
+                  <div className="relative z-10 flex items-center gap-2 mb-4 md:mb-6 text-on-surface">
+                    <span className="material-symbols-outlined text-[#8f4e00]">eco</span>
+                    <h3 className="text-lg md:text-xl font-bold font-headline tracking-tight">Complete Your Ritual</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 md:gap-4 relative z-10">
+                    {allProducts
+                      .filter((p: any) => !cartItems.some((item: any) => item.productId._id === p._id))
+                      .slice(0, 2)
+                      .map((product: any) => (
+                        <div key={product._id} className="bg-white rounded-xl md:rounded-2xl p-3 md:p-5 shadow-sm flex flex-col items-center text-center group">
+                          <div className="w-full h-20 md:h-28 overflow-hidden rounded-lg md:rounded-xl mb-3 md:mb-4">
+                            <img 
+                              src={product.imageUrl} 
+                              alt={product.name} 
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1622597467836-f38240662c8b?auto=format&fit=crop&w=300&q=80";
+                              }}
+                            />
+                          </div>
+                          <h4 className="font-bold text-[12px] md:text-sm text-on-surface mb-1 line-clamp-1">{product.name}</h4>
+                          <p className="text-primary font-bold text-[11px] md:text-xs mb-3 md:mb-4">+₹{Number(product.price).toFixed(0)}</p>
+                          <button 
+                            onClick={() => updateQuantity(product._id, "add")} 
+                            className="w-full py-2 bg-[#f2f5ee] hover:bg-[#e4ebdd] text-[#1b4321] text-[11px] md:text-xs font-bold rounded-full transition-colors flex items-center justify-center gap-1"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">add_shopping_cart</span>
+                            Add
+                          </button>
+                        </div>
+                    ))}
+                  </div>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-3 md:gap-4 relative z-10">
-                   {/* Upsell 1 */}
-                   <div className="bg-white rounded-xl md:rounded-2xl p-3 md:p-5 shadow-sm flex flex-col items-center text-center">
-                     <img src="https://images.unsplash.com/photo-1596280453303-34e9e033fb9b?q=80&w=200&auto=format&fit=crop" alt="Hemp Hearts" className="w-full h-20 md:h-28 object-cover rounded-lg md:rounded-xl mb-3 md:mb-4" />
-                     <h4 className="font-bold text-[12px] md:text-sm text-on-surface mb-1">Organic Hemp Hearts</h4>
-                     <p className="text-primary font-bold text-[11px] md:text-xs mb-3 md:mb-4">+₹4.50</p>
-                     <button onClick={() => toast.error("Currently out of stock")} className="w-full py-2 bg-[#f2f5ee] hover:bg-[#e4ebdd] text-[#1b4321] text-[11px] md:text-xs font-bold rounded-full transition-colors">Add to Bag</button>
-                   </div>
-                   {/* Upsell 2 */}
-                   <div className="bg-white rounded-xl md:rounded-2xl p-3 md:p-5 shadow-sm flex flex-col items-center text-center">
-                     <img src="https://images.unsplash.com/photo-1622597467836-f309a6fc430a?q=80&w=200&auto=format&fit=crop" alt="Botanical Glassware" className="w-full h-20 md:h-28 object-cover rounded-lg md:rounded-xl mb-3 md:mb-4" />
-                     <h4 className="font-bold text-[12px] md:text-sm text-on-surface mb-1">Botanical Glassware</h4>
-                     <p className="text-primary font-bold text-[11px] md:text-xs mb-3 md:mb-4">+₹18.00</p>
-                     <button onClick={() => toast.error("Currently out of stock")} className="w-full py-2 bg-[#f2f5ee] hover:bg-[#e4ebdd] text-[#1b4321] text-[11px] md:text-xs font-bold rounded-full transition-colors">Add to Bag</button>
-                   </div>
-                </div>
-              </div>
+              )}
 
             </div>
 

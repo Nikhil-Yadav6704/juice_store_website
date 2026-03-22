@@ -11,7 +11,15 @@ export default function OrdersPage() {
   const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000, dedupingInterval: 5000 });
   const { data: rewardData } = useSWR("/api/user/rewards", fetcher, { dedupingInterval: 300000 });
   const { data: orders, isLoading, mutate: mutateOrders } = useSWR("/api/orders", fetcher, { dedupingInterval: 30000 });
+  const { data: settings } = useSWR("/api/settings", fetcher);
   
+  // Shop Status Logic
+  const shopSettings = settings?.shop || { isManualClose: false, openingTime: "09:00", closingTime: "21:00" };
+  const now = new Date();
+  const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+  const isInsideHours = currentTime >= shopSettings.openingTime && currentTime <= shopSettings.closingTime;
+  const isShopOpen = !shopSettings.isManualClose && isInsideHours;
+
   const [showAllHistory, setShowAllHistory] = useState(false);
 
   const activeOrders = orders?.filter((o: any) => !['Delivered', 'Cancelled'].includes(o.status)) || [];
@@ -31,11 +39,16 @@ export default function OrdersPage() {
                  <span className="material-symbols-outlined text-[20px] md:text-[24px]">timer</span>
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-[#a3f69c] mb-0.5">Batch Closing</span>
-                <div className="font-headline font-bold flex items-baseline gap-1.5">
+                <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-[#a3f69c] mb-0.5">
+                  {isShopOpen ? "Batch Closing" : "Batch Paused"}
+                </span>
+                <div className="font-headline font-bold flex flex-col items-baseline gap-0.5">
                    <span className="text-2xl md:text-4xl tracking-tighter">
-                     {liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} /> : "00:00"}
+                     {isShopOpen && liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} /> : "00:00"}
                    </span>
+                   {!isShopOpen && (
+                     <span className="text-[9px] font-bold text-[#fbdfc6] uppercase tracking-tighter animate-pulse">Store is closed</span>
+                   )}
                 </div>
               </div>
             </div>

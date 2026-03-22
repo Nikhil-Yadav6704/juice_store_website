@@ -15,9 +15,9 @@ export default function MenuPage() {
     revalidateOnFocus: false,
   });
   const { data: cartData, mutate: mutateCart } = useSWR(
-    session ? "/api/cart" : null,
+    session?.user ? ["/api/cart", session.user.id] : null,
     fetcher,
-    { dedupingInterval: 60000 }
+    { dedupingInterval: 500, revalidateOnFocus: true, revalidateOnMount: true }
   );
   const [selectedCategory, setSelectedCategory] = useState("All");
 
@@ -157,9 +157,18 @@ export default function MenuPage() {
             Explore our curated selection of cold-pressed botanicals, designed to nourish and revitalize. From orchard to glass, no shortcuts.
           </p>
         </div>
-        <div className="hidden lg:flex w-64 h-64 rounded-full border border-surface-container-high bg-surface-container-lowest items-center justify-center relative shadow-sm">
-          <div className="absolute inset-0 flex items-center justify-center">
-             <span className="text-[9px] font-black text-[#5c6359] uppercase tracking-widest text-center max-w-[100px] leading-relaxed">Pure Organic <br/>Cold Pressed</span>
+        <div 
+          className="hidden lg:flex w-64 h-64 rounded-full border border-surface-container-high bg-surface-container-lowest items-center justify-center relative shadow-sm overflow-hidden"
+          style={{ 
+            backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuCQpPQPufZrSwnOr556tseR0bhHXW2Z1Izvz7qALlZNuNhncVPvTXqoWRfbqQsY4rSvi0YORLmJgwcj2yY96FoiTWXwqzizBjWm_Xyqd8-hWX9lwcY1UanOh3kxaCqy4sAcnlnhildquaH29Rq05-CM85ETkn92xRHIBFRdtJt_KtYqVW0YCy_ECWIYqI7Ex4lT2gQjRmtuKOtuBK3ellhHdR4IJ5tOrugUcqs87ZIkja7jAY4T09nujfV0-VgqrlPFpcufQuf2NuE')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] flex items-center justify-center">
+             <span className="text-[9px] font-black text-[#1b4321] uppercase tracking-widest text-center max-w-[100px] leading-relaxed drop-shadow-sm">
+               Pure Organic <br/>Cold Pressed
+             </span>
           </div>
         </div>
       </section>

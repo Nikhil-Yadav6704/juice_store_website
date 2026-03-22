@@ -108,18 +108,33 @@ export default function AdminOrdersPage() {
     toast.success("Orders CSV downloaded.");
   };
 
+  // Shop Status Logic
+  const shopSettings = settings?.shop || { isManualClose: false, openingTime: "09:00", closingTime: "21:00" };
+  const now = new Date();
+  const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+  const isInsideHours = currentTime >= shopSettings.openingTime && currentTime <= shopSettings.closingTime;
+  const isShopOpen = !shopSettings.isManualClose && isInsideHours;
+
   return (
     <div className="space-y-10 pb-12">
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
         <div>
           <h1 className="text-[2.75rem] font-extrabold font-headline text-primary tracking-tight leading-none mb-4">Live Operations</h1>
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[#8f4e00] text-3xl">schedule</span>
-            <span className="text-on-surface-variant font-medium">Current Hour Session:</span>
-            <span className="bg-surface-container font-headline font-black text-on-surface px-4 py-1.5 rounded-lg tracking-widest text-lg">
-              {liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} format="hh:mm:ss" /> : "00:00:00"}
-            </span>
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[#8f4e00] text-3xl">schedule</span>
+              <span className="text-on-surface-variant font-medium">Current Hour Session:</span>
+              <span className="bg-surface-container font-headline font-black text-on-surface px-4 py-1.5 rounded-lg tracking-widest text-lg">
+                {isShopOpen && liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} format="hh:mm:ss" /> : "00:00:00"}
+              </span>
+            </div>
+            {!isShopOpen && (
+              <div className="text-[10px] font-bold text-[#ba1a1a] uppercase tracking-widest ml-11 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a] animate-pulse"></span>
+                Session paused: Store is currently closed
+              </div>
+            )}
           </div>
         </div>
 
@@ -147,7 +162,9 @@ export default function AdminOrdersPage() {
           </button>
           <div className="bg-surface-container-lowest shadow-sm rounded-2xl p-5 border border-surface-container w-40 flex flex-col justify-center">
             <div className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Due Next 15m</div>
-            <div className="text-3xl font-black text-[#8f4e00] font-headline">{Math.min(8, filteredOrders.filter((o: any) => o.status === 'Pending').length).toString().padStart(2,'0')}</div>
+            <div className="text-3xl font-black text-[#8f4e00] font-headline">
+              {isShopOpen ? Math.min(8, filteredOrders.filter((o: any) => o.status === 'Pending').length).toString().padStart(2,'0') : "00"}
+            </div>
           </div>
         </div>
       </div>

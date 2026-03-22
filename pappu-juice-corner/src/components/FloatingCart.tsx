@@ -9,15 +9,17 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function FloatingCart() {
   const { data: session } = useSession();
   
-  const { data, error } = useSWR(session ? "/api/cart/count" : null, fetcher, {
-    refreshInterval: 5000,
-  });
+  const { data: cartData } = useSWR(
+    session?.user ? ["/api/cart", session.user.id] : null,
+    fetcher,
+    { dedupingInterval: 500 }
+  );
 
   if (!session || session.user?.role === "admin") {
     return null;
   }
 
-  const itemCount = data?.count || 0;
+  const itemCount = cartData?.items?.reduce((acc: number, item: any) => acc + item.quantity, 0) || 0;
 
   return (
     <Link href="/cart" className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[100] group">
