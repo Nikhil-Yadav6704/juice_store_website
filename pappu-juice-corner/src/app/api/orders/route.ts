@@ -13,7 +13,9 @@ export async function GET() {
   }
 
   await connectToDatabase();
-  const orders = await Order.find({ userId: session.user.id }).sort({ createdAt: -1 });
+  const orders = await Order.find({ userId: session.user.id })
+    .select("-__v")
+    .sort({ createdAt: -1 });
   
   return NextResponse.json(orders);
 }
@@ -29,13 +31,18 @@ export async function POST(req: Request) {
     
     await connectToDatabase();
     
-    // Get Settings for delivery prices
+    // Get Settings, User, and Cart in parallel
     const Settings = (await import("@/models/Settings")).default;
-    const settings = await Settings.findOne();
     const User = (await import("@/models/User")).default;
+    
+    const [settings, cart] = await Promise.all([
+      Settings.findOne().select("delivery"),
+      Cart.findOne({ userId: session.user.id }).populate({
+        path: "items.productId",
+        select: "name price imageUrl"
+      })
+    ]);
 
-    // Get user's cart
-    const cart = await Cart.findOne({ userId: session.user.id }).populate("items.productId");
     if (!cart || cart.items.length === 0) {
       return NextResponse.json({ message: "Cart is empty" }, { status: 400 });
     }

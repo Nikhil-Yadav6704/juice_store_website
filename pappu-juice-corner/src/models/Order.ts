@@ -10,7 +10,7 @@ const OrderItemSchema = new Schema({
 
 const OrderSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     orderId: { type: String, required: true, unique: true },
     items: [OrderItemSchema],
     deliveryType: {
@@ -25,12 +25,15 @@ const OrderSchema = new Schema(
       type: String,
       enum: ["Pending", "Preparing", "Out for Delivery", "Delivered", "Cancelled"],
       default: "Pending",
+      index: true,
     },
     cancellationReason: { type: String },
     cancelledBy: { type: String, enum: ['admin', 'user'] },
   },
   { timestamps: true }
 );
+
+OrderSchema.index({ createdAt: -1 });
 
 const Order = models.Order || model("Order", OrderSchema);
 export default Order;

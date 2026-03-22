@@ -3,37 +3,16 @@
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import toast from "react-hot-toast";
+import CountdownTimer from "@/components/CountdownTimer";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function OrdersPage() {
-  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000 });
-  const { data: rewardData } = useSWR("/api/user/rewards", fetcher);
-  const { data: orders, isLoading, mutate: mutateOrders } = useSWR("/api/orders", fetcher);
+  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000, dedupingInterval: 5000 });
+  const { data: rewardData } = useSWR("/api/user/rewards", fetcher, { dedupingInterval: 300000 });
+  const { data: orders, isLoading, mutate: mutateOrders } = useSWR("/api/orders", fetcher, { dedupingInterval: 30000 });
   
-  const [timeLeft, setTimeLeft] = useState("");
   const [showAllHistory, setShowAllHistory] = useState(false);
-
-  useEffect(() => {
-    if (!liveData?.nextBatchEnd) return;
-    
-    const interval = setInterval(() => {
-      const target = new Date(liveData.nextBatchEnd).getTime();
-      const now = new Date().getTime();
-      const difference = target - now;
-
-      if (difference <= 0) {
-        setTimeLeft("00:00");
-        return;
-      }
-
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-      setTimeLeft(`${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [liveData]);
 
   const activeOrders = orders?.filter((o: any) => !['Delivered', 'Cancelled'].includes(o.status)) || [];
   const pastOrders = orders?.filter((o: any) => ['Delivered', 'Cancelled'].includes(o.status)) || [];
@@ -54,7 +33,9 @@ export default function OrdersPage() {
               <div className="flex flex-col min-w-0">
                 <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-[#a3f69c] mb-0.5">Batch Closing</span>
                 <div className="font-headline font-bold flex items-baseline gap-1.5">
-                   <span className="text-2xl md:text-4xl tracking-tighter">{timeLeft || "45:00"}</span>
+                   <span className="text-2xl md:text-4xl tracking-tighter">
+                     {liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} /> : "00:00"}
+                   </span>
                 </div>
               </div>
             </div>
@@ -168,15 +149,22 @@ export default function OrdersPage() {
                              <button onClick={async () => {
                                if (window.confirm("Are you sure you want to cancel this order?")) {
                                  try {
+                                   // Optimistic Update
+                                   const newOrders = orders.map((o: any) => 
+                                     o._id === order._id ? { ...o, status: "Cancelled" } : o
+                                   );
+                                   mutateOrders(newOrders, false);
+
                                    const res = await fetch(`/api/orders/${order._id}/cancel`, { method: "POST" });
                                    if (res.ok) {
                                      toast.success("Order cancelled");
                                      mutateOrders();
                                    } else {
-                                     toast.error("Failed to cancel order");
+                                     throw new Error();
                                    }
                                  } catch {
-                                   toast.error("An error occurred");
+                                   toast.error("Failed to cancel order");
+                                   mutateOrders(); // Revert
                                  }
                                }
                              }} className="text-[#ba1a1a] font-bold text-[13px] hover:underline transition-all">Cancel Order</button>

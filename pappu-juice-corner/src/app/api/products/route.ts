@@ -60,7 +60,9 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const showAll = searchParams.get("all") === "true";
   
-  let products = showAll ? await Product.find({}) : await Product.find({ isVisible: true });
+  let products = showAll 
+    ? await Product.find({}).select("-__v") 
+    : await Product.find({ isVisible: true }).select("name category description price imageUrl isVisible");
 
   if (products.length === 0) {
     // Seed initial products for the demo

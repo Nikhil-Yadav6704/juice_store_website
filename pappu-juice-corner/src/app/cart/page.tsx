@@ -4,19 +4,20 @@ import { useState, useEffect } from "react";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import CountdownTimer from "@/components/CountdownTimer";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function CartPage() {
   const router = useRouter();
-  const { data: cartData, mutate: mutateCart, isLoading } = useSWR("/api/cart", fetcher);
-  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000 });
-  const { data: settings } = useSWR("/api/settings", fetcher);
+  const { data: cartData, mutate: mutateCart, isLoading } = useSWR("/api/cart", fetcher, { dedupingInterval: 60000 });
+  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000, dedupingInterval: 5000 });
+  const { data: settings } = useSWR("/api/settings", fetcher, { dedupingInterval: 300000, revalidateOnFocus: false });
   
   const [deliveryType, setDeliveryType] = useState("hourly");
-  const [timeLeft, setTimeLeft] = useState("");
   const [placingOrder, setPlacingOrder] = useState(false);
-  // Calculate Dynamic Time Slots
+  
+  // Arrival estimate logic moved here for clarity
   const getDynamicSlot = () => {
     if (!liveData?.nextBatchEnd) return "Calculating...";
     const batchDate = new Date(liveData.nextBatchEnd);
@@ -29,37 +30,37 @@ export default function CartPage() {
     return `Arrival: 10-15 mins`;
   };
 
-  useEffect(() => {
-    if (!liveData?.nextBatchEnd) return;
-    
-    const interval = setInterval(() => {
-      const target = new Date(liveData.nextBatchEnd).getTime();
-      const now = new Date().getTime();
-      const difference = target - now;
-
-      if (difference <= 0) {
-        setTimeLeft("00:00");
-        return;
-      }
-
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-      setTimeLeft(`${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [liveData]);
-
   const updateQuantity = async (productId: string, action: "add" | "decrement" | "remove") => {
     try {
-      await fetch("/api/cart", {
+      // Optimistic Update
+      const currentItems = cartData?.items || [];
+      const itemIndex = currentItems.findIndex((i: any) => (i.productId._id || i.productId) === productId);
+      
+      if (itemIndex > -1) {
+        const newItems = [...currentItems];
+        if (action === "remove") {
+          newItems.splice(itemIndex, 1);
+        } else {
+          const newQty = action === "add" ? newItems[itemIndex].quantity + 1 : newItems[itemIndex].quantity - 1;
+          if (newQty <= 0) {
+            newItems.splice(itemIndex, 1);
+          } else {
+            newItems[itemIndex] = { ...newItems[itemIndex], quantity: newQty };
+          }
+        }
+        mutateCart({ ...cartData, items: newItems }, false);
+      }
+
+      const res = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, action }),
       });
+      if (!res.ok) throw new Error();
       mutateCart();
     } catch {
       toast.error("Failed to update cart");
+      mutateCart(); // Revert
     }
   };
 
@@ -133,7 +134,7 @@ export default function CartPage() {
              
              <div className="bg-black/20 text-white flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-[13px] md:text-sm border border-white/10 w-full md:w-auto justify-center">
                <span className="material-symbols-outlined text-[16px]">hourglass_empty</span>
-               Batch Closes In: {timeLeft || "00:00"}
+               Batch Closes In: {liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} /> : "00:00"}
              </div>
           </div>
 

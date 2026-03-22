@@ -10,10 +10,14 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function MenuPage() {
   const { data: session } = useSession();
-  const { data: products, error, isLoading } = useSWR("/api/products", fetcher);
+  const { data: products, error, isLoading } = useSWR("/api/products", fetcher, {
+    dedupingInterval: 300000,
+    revalidateOnFocus: false,
+  });
   const { data: cartData, mutate: mutateCart } = useSWR(
     session ? "/api/cart" : null,
-    fetcher
+    fetcher,
+    { dedupingInterval: 60000 }
   );
   const [selectedCategory, setSelectedCategory] = useState("All");
 
@@ -38,6 +42,21 @@ export default function MenuPage() {
     }
 
     try {
+      // Optimistic Update
+      const product = products.find((p: any) => p._id === productId);
+      const currentItems = cartData?.items || [];
+      const itemIndex = currentItems.findIndex((i: any) => (i.productId._id || i.productId) === productId);
+      
+      let newItems;
+      if (itemIndex > -1) {
+        newItems = [...currentItems];
+        newItems[itemIndex] = { ...newItems[itemIndex], quantity: newItems[itemIndex].quantity + 1 };
+      } else {
+        newItems = [...currentItems, { productId: product, quantity: 1 }];
+      }
+      
+      mutateCart({ ...cartData, items: newItems }, false);
+
       const res = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,22 +65,44 @@ export default function MenuPage() {
       if (res.ok) {
         toast.success("Added to cart!");
         mutateCart();
+      } else {
+        throw new Error();
       }
     } catch {
       toast.error("Failed to add to cart");
+      mutateCart(); // Revert on failure
     }
   };
 
   const updateCartQuantity = async (productId: string, action: "add" | "decrement") => {
     try {
-      await fetch("/api/cart", {
+      // Optimistic Update
+      const currentItems = cartData?.items || [];
+      const itemIndex = currentItems.findIndex((i: any) => (i.productId._id || i.productId) === productId);
+      
+      if (itemIndex > -1) {
+        const newItems = [...currentItems];
+        const newQty = action === "add" ? newItems[itemIndex].quantity + 1 : newItems[itemIndex].quantity - 1;
+        
+        if (newQty <= 0) {
+          newItems.splice(itemIndex, 1);
+        } else {
+          newItems[itemIndex] = { ...newItems[itemIndex], quantity: newQty };
+        }
+        
+        mutateCart({ ...cartData, items: newItems }, false);
+      }
+
+      const res = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, action }),
       });
+      if (!res.ok) throw new Error();
       mutateCart();
     } catch {
       toast.error("Failed to update cart");
+      mutateCart(); // Revert
     }
   };
 

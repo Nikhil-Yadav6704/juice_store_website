@@ -189,6 +189,12 @@ export default function AdminMenuPage() {
 
   const handleToggleVisibility = async (id: string, currentStatus: boolean) => {
     try {
+      // Optimistic Update
+      const newProducts = products.map((p: any) => 
+        p._id === id ? { ...p, isVisible: !currentStatus } : p
+      );
+      mutate(newProducts, false);
+
       const res = await fetch(`/api/products/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -198,10 +204,11 @@ export default function AdminMenuPage() {
         toast.success(currentStatus ? "Product hidden" : "Product visible");
         mutate();
       } else {
-        toast.error("Failed to update product");
+        throw new Error();
       }
     } catch {
-      toast.error("An error occurred");
+      toast.error("Failed to update product");
+      mutate(); // Revert
     }
   };
 

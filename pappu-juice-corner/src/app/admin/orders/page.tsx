@@ -4,16 +4,16 @@ import useSWR from "swr";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { exportToCSV } from "@/lib/exportCsv";
+import CountdownTimer from "@/components/CountdownTimer";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function AdminOrdersPage() {
-  const { data: orders, error, isLoading, mutate } = useSWR("/api/admin/orders", fetcher);
-  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000 });
+  const { data: orders, error, isLoading, mutate } = useSWR("/api/admin/orders", fetcher, { dedupingInterval: 30000 });
+  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000, dedupingInterval: 5000 });
   
   const [filter, setFilter] = useState("All Status");
   const [search, setSearch] = useState("");
-  const [timeLeft, setTimeLeft] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -28,26 +28,14 @@ export default function AdminOrdersPage() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  useEffect(() => {
-    if (!liveData?.nextBatchEnd) return;
-    const interval = setInterval(() => {
-      const target = new Date(liveData.nextBatchEnd).getTime();
-      const now = new Date().getTime();
-      const difference = target - now;
-      if (difference <= 0) {
-        setTimeLeft("00:00:00");
-        return;
-      }
-      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-      setTimeLeft(`${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [liveData]);
-
   const handleStatusUpdate = async (id: string, newStatus: string, cancellationReason?: string) => {
     try {
+      // Optimistic Update
+      const newOrders = orders.map((o: any) => 
+        o._id === id ? { ...o, status: newStatus, cancellationReason, cancelledBy: newStatus === 'Cancelled' ? 'admin' : o.cancelledBy } : o
+      );
+      mutate(newOrders, false);
+
       const body: any = { status: newStatus };
       if (newStatus === 'Cancelled') {
         body.cancellationReason = cancellationReason;
@@ -63,10 +51,11 @@ export default function AdminOrdersPage() {
         toast.success("Order status updated");
         mutate();
       } else {
-        toast.error("Failed to update status");
+        throw new Error();
       }
     } catch {
-      toast.error("An error occurred");
+      toast.error("Failed to update status");
+      mutate(); // Revert
     }
   };
 
@@ -107,7 +96,7 @@ export default function AdminOrdersPage() {
             <span className="material-symbols-outlined text-[#8f4e00] text-3xl">schedule</span>
             <span className="text-on-surface-variant font-medium">Current Hour Session:</span>
             <span className="bg-surface-container font-headline font-black text-on-surface px-4 py-1.5 rounded-lg tracking-widest text-lg">
-              {timeLeft || "14:42:05"}
+              {liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} format="hh:mm:ss" /> : "00:00:00"}
             </span>
           </div>
         </div>

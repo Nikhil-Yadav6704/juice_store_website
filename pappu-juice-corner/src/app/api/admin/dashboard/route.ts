@@ -18,13 +18,15 @@ export async function GET() {
   const startOfHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0);
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
 
-  // Today's Pulse
-  const todaysOrders = await Order.find({ createdAt: { $gte: startOfDay } });
+  // Fetch Today's Pulse and Monthly Aggregates in parallel
+  const [todaysOrders, monthlyOrdersRaw] = await Promise.all([
+    Order.find({ createdAt: { $gte: startOfDay } }).select("grandTotal items createdAt"),
+    Order.find({ createdAt: { $gte: startOfMonth } }).select("grandTotal items createdAt")
+  ]);
+
   const dailyRevenue = todaysOrders.reduce((acc, current) => acc + current.grandTotal, 0);
   const dailyOrderCount = todaysOrders.length;
 
-  // Monthly Aggregates
-  const monthlyOrdersRaw = await Order.find({ createdAt: { $gte: startOfMonth } });
   const monthlyRevenue = monthlyOrdersRaw.reduce((acc, curr) => acc + curr.grandTotal, 0);
   const monthlyOrdersCount = monthlyOrdersRaw.length;
   const avgOrderValue = monthlyOrdersCount > 0 ? Math.round(monthlyRevenue / monthlyOrdersCount) : 0;
