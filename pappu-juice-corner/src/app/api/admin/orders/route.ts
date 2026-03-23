@@ -8,12 +8,13 @@ import Product from "@/models/Product"; // Ensure model is registered for popula
 
 export async function GET() {
   try {
+    await connectToDatabase();
+    
     const session = await getServerSession(authOptions);
     if (!session || session.user?.role !== "admin") {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    await connectToDatabase();
     const orders = await Order.find()
       .populate("userId", "fullName phone email juicesCount")
       .populate("items.productId", "imageUrl")
