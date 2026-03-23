@@ -50,22 +50,26 @@ export default function ProfilePage() {
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
+      const result = await res.json().catch(() => ({}));
       
       if (res.ok) {
-        // Defensive check for profile update response
-        if (!data) {
-          console.error("Profile update response is undefined");
-          return toast.error("Received empty response from server");
+        if (!result || (!result.profile && !result.user)) {
+          console.warn('Profile update: unexpected response shape', result);
+          toast.success("Profile update request sent.");
+          mutate();
+          setLoading(false);
+          return;
         }
 
-        toast.success(data?.message || "Profile updated successfully");
+        const profileData = result.profile || result.user;
+        toast.success(result?.message || "Profile updated successfully");
         setFormData((prev) => ({ ...prev, currentPassword: "", newPassword: "" }));
         mutate();
       } else {
-        toast.error(data?.message || "Failed to update profile");
+        toast.error(result?.message || "Failed to update profile");
       }
-    } catch {
+    } catch (error) {
+      console.error("Profile update error:", error);
       toast.error("An error occurred. Please try again.");
     } finally {
       setLoading(false);

@@ -21,10 +21,16 @@ export async function GET() {
 
     return NextResponse.json(orders);
   } catch (error: any) {
-    console.error("Admin orders API error:", error.message, error.stack);
-    return NextResponse.json(
-      { message: "Failed to load orders", error: error.message },
-      { status: 500 }
-    );
+    console.error('ADMIN ORDERS FULL ERROR:', {
+      message: error.message,
+      name: error.name,
+      code: error.code,
+      stack: error.stack
+    });
+    return NextResponse.json({ 
+      error: error.message,
+      type: error.name,
+      code: error.code 
+    }, { status: 500 });
   }
 }
