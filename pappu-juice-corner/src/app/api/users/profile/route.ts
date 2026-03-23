@@ -6,15 +6,23 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
 
-  await connectToDatabase();
-  const user = await User.findById(session.user.id).select("-password");
-  
-  return NextResponse.json(user);
+    await connectToDatabase();
+    const user = await User.findById(session.user.id).select("-password");
+    
+    return NextResponse.json(user);
+  } catch (error: any) {
+    console.error("Profile GET API error (plural):", error.message, error.stack);
+    return NextResponse.json(
+      { message: "Failed to load profile", error: error.message },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PUT(req: Request) {
@@ -48,7 +56,8 @@ export async function PUT(req: Request) {
 
     await user.save();
     return NextResponse.json({ message: "Profile updated successfully" });
-  } catch (error) {
-    return NextResponse.json({ message: "Failed to update profile" }, { status: 500 });
+  } catch (error: any) {
+    console.error("Profile PUT API error:", error.message, error.stack);
+    return NextResponse.json({ message: "Failed to update profile", error: error.message }, { status: 500 });
   }
 }

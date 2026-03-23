@@ -17,7 +17,8 @@ export async function GET() {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
     return NextResponse.json(user);
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Profile GET API error (singular):", error.message, error.stack);
     return NextResponse.json({ message: "Error fetching user" }, { status: 500 });
   }
 }

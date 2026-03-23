@@ -15,7 +15,7 @@ export default function MenuPage() {
     revalidateOnFocus: false,
   });
   const { data: cartData, mutate: mutateCart } = useSWR(
-    session?.user ? ["/api/cart", session.user.id] : null,
+    session?.user ? `/api/cart/${session.user.id}` : null,
     fetcher,
     { 
       dedupingInterval: 10000,

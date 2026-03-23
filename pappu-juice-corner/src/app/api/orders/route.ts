@@ -7,18 +7,26 @@ import Cart from "@/models/Cart";
 import crypto from "crypto";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
 
-  await connectToDatabase();
-  const orders = await Order.find({ userId: session.user.id })
-    .populate("items.productId", "imageUrl")
-    .select("-__v")
-    .sort({ createdAt: -1 });
-  
-  return NextResponse.json(orders);
+    await connectToDatabase();
+    const orders = await Order.find({ userId: session.user.id })
+      .populate("items.productId", "imageUrl")
+      .select("-__v")
+      .sort({ createdAt: -1 });
+    
+    return NextResponse.json(orders);
+  } catch (error: any) {
+    console.error("Orders GET API error:", error.message, error.stack);
+    return NextResponse.json(
+      { message: "Failed to load orders", error: error.message },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: Request) {

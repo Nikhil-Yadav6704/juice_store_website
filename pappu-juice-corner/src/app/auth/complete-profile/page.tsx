@@ -54,7 +54,7 @@ export default function CompleteProfilePage() {
         router.refresh();
       } else {
         const data = await res.json();
-        toast.error(data.message || "Failed to complete profile");
+        toast.error(data?.message || "Failed to complete profile");
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");

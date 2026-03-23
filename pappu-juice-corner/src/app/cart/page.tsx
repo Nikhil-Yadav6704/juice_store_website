@@ -12,7 +12,7 @@ export default function CartPage() {
   const router = useRouter();
   const { data: session } = useSWR("/api/auth/session", fetcher);
   const { data: cartData, mutate: mutateCart, isLoading } = useSWR(
-    session?.user ? ["/api/cart", session.user.id] : null, 
+    session?.user ? `/api/cart/${session.user.id}` : null, 
     fetcher, 
     { dedupingInterval: 500, revalidateOnFocus: true, revalidateOnMount: true }
   );

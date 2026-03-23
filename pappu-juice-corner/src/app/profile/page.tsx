@@ -53,11 +53,17 @@ export default function ProfilePage() {
       const data = await res.json();
       
       if (res.ok) {
+        // Defensive check for profile update response
+        if (!data) {
+          console.error("Profile update response is undefined");
+          return toast.error("Received empty response from server");
+        }
+
         toast.success(data.message || "Profile updated successfully");
         setFormData((prev) => ({ ...prev, currentPassword: "", newPassword: "" }));
         mutate();
       } else {
-        toast.error(data.message || "Failed to update profile");
+        toast.error(data?.message || "Failed to update profile");
       }
     } catch {
       toast.error("An error occurred. Please try again.");

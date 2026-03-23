@@ -6,19 +6,27 @@ import Cart from "@/models/Cart";
 import Product from "@/models/Product";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    await connectToDatabase();
+    const cart = await Cart.findOne({ userId: session.user.id }).populate("items.productId");
+
+    if (!cart) {
+      return NextResponse.json({ items: [] });
+    }
+
+    return NextResponse.json(cart);
+  } catch (error: any) {
+    console.error("Cart GET API error:", error.message, error.stack);
+    return NextResponse.json(
+      { message: "Failed to load cart", error: error.message },
+      { status: 500 }
+    );
   }
-
-  await connectToDatabase();
-  const cart = await Cart.findOne({ userId: session.user.id }).populate("items.productId");
-
-  if (!cart) {
-    return NextResponse.json({ items: [] });
-  }
-
-  return NextResponse.json(cart);
 }
 
 export async function POST(req: Request) {
@@ -61,7 +69,8 @@ export async function POST(req: Request) {
 
     await cart.save();
     return NextResponse.json({ message: "Cart updated", cart });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Cart POST API error:", error.message, error.stack);
     return NextResponse.json({ message: "Error updating cart" }, { status: 500 });
   }
 }

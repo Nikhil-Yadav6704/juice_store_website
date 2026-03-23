@@ -18,6 +18,21 @@ async function connectToDatabase() {
 
     const originalUri = process.env.MONGODB_URI;
 
+    // Production environment variable validation
+    if (process.env.NODE_ENV === "production") {
+      const requiredEnvVars = ["MONGODB_URI", "NEXTAUTH_SECRET", "NEXTAUTH_URL"];
+      const missingVars = requiredEnvVars.filter((v) => !process.env[v]);
+      if (missingVars.length > 0) {
+        console.error("❌ CRITICAL: Missing production environment variables:", missingVars.join(", "));
+        console.log("Current Environment:", {
+          MONGODB_URI: process.env.MONGODB_URI ? "DEFINED" : "MISSING",
+          NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? "DEFINED" : "MISSING",
+          NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+          NODE_ENV: process.env.NODE_ENV
+        });
+      }
+    }
+
     // Use memory server if no real URI is provided or if using the dummy URI
     if (!originalUri || originalUri.includes("127.0.0.1") || originalUri.includes("localhost")) {
       console.log("🚀 Initializing In-Memory MongoDB Server for seamless local testing...");
