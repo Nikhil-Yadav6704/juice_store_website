@@ -28,19 +28,19 @@ export default function AdminDashboard() {
     if (!dashboardData) return toast.error("No data to export");
     const exportData = [
       {
-         Metric: "Daily Revenue", Value: dashboardData.pulse.dailyRevenue,
+         Metric: "Daily Revenue", Value: dashboardData?.pulse?.dailyRevenue || 0,
       },
       {
-         Metric: "Daily Orders", Value: dashboardData.pulse.dailyOrderCount,
+         Metric: "Daily Orders", Value: dashboardData?.pulse?.dailyOrderCount || 0,
       },
       {
-         Metric: "Top Product", Value: dashboardData.pulse.topProduct,
+         Metric: "Top Product", Value: dashboardData?.pulse?.topProduct || "N/A",
       },
       {
-         Metric: "Monthly Revenue", Value: dashboardData.stats.monthlyRevenue,
+         Metric: "Monthly Revenue", Value: dashboardData?.stats?.monthlyRevenue || 0,
       },
       {
-         Metric: "Kitchen Capacity", Value: dashboardData.stats.kitchenCapacity,
+         Metric: "Kitchen Capacity", Value: dashboardData?.stats?.kitchenCapacity || "N/A",
       }
     ];
     exportToCSV(exportData, `orchard_dashboard_summary_${new Date().toISOString().split('T')[0]}`);

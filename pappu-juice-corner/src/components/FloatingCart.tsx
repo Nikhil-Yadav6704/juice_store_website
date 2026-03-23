@@ -10,7 +10,7 @@ export default function FloatingCart() {
   const { data: session } = useSession();
   
   const { data: cartData } = useSWR(
-    session?.user ? ["/api/cart", session.user.id] : null,
+    session?.user ? `/api/cart/${session.user.id}` : null,
     fetcher,
     { 
       dedupingInterval: 10000,

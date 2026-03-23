@@ -59,7 +59,7 @@ export default function ProfilePage() {
           return toast.error("Received empty response from server");
         }
 
-        toast.success(data.message || "Profile updated successfully");
+        toast.success(data?.message || "Profile updated successfully");
         setFormData((prev) => ({ ...prev, currentPassword: "", newPassword: "" }));
         mutate();
       } else {

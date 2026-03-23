@@ -25,7 +25,7 @@ export default function AdminAnalyticsPage() {
       { Metric: "Weekly Percent", Value: analytics.cards.weekly.percent },
       { Metric: "Monthly Percent", Value: analytics.cards.monthly.percent },
       { Metric: "Active Users", Value: analytics.userBehavior.activeUsers },
-      ...analytics.productPerformance.map((p: any) => ({
+      ...(Array.isArray(analytics.productPerformance) ? analytics.productPerformance : []).map((p: any) => ({
         Metric: `Product: ${p.name}`, Value: `Units: ${p.units} | Revenue: ${p.revenue}`
       }))
     ];

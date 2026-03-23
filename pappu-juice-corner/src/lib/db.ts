@@ -24,12 +24,10 @@ async function connectToDatabase() {
       const missingVars = requiredEnvVars.filter((v) => !process.env[v]);
       if (missingVars.length > 0) {
         console.error("❌ CRITICAL: Missing production environment variables:", missingVars.join(", "));
-        console.log("Current Environment:", {
-          MONGODB_URI: process.env.MONGODB_URI ? "DEFINED" : "MISSING",
-          NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? "DEFINED" : "MISSING",
-          NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-          NODE_ENV: process.env.NODE_ENV
-        });
+      }
+
+      if (process.env.NEXTAUTH_URL?.endsWith("/")) {
+        console.error("⚠️ WARNING: NEXTAUTH_URL has a trailing slash. This can cause authentication issues on Vercel. Recommended: https://juice-store-website.vercel.app");
       }
     }
 

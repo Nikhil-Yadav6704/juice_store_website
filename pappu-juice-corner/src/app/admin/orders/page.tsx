@@ -62,7 +62,7 @@ export default function AdminOrdersPage() {
   const handleStatusUpdate = async (id: string, newStatus: string, cancellationReason?: string) => {
     try {
       // Optimistic Update
-      const newOrders = orders.map((o: any) => 
+      const newOrders = (Array.isArray(orders) ? orders : []).map((o: any) => 
         o._id === id ? { ...o, status: newStatus, cancellationReason, cancelledBy: newStatus === 'Cancelled' ? 'admin' : o.cancelledBy } : o
       );
       mutate(newOrders, false);
@@ -93,7 +93,7 @@ export default function AdminOrdersPage() {
   if (isLoading) return <div className="p-8 font-bold text-xl">Loading Live Operations...</div>;
   if (error) return <div className="p-8 text-error font-bold">Failed to load operations.</div>;
 
-  const filteredOrders = orders?.filter((o: any) => {
+  const filteredOrders = (Array.isArray(orders) ? orders : []).filter((o: any) => {
     const statusMatch = filter === "All Status" || o.status === filter;
     const searchMatch = search === "" || o.orderId.toLowerCase().includes(search.toLowerCase()) || o.userId?.fullName.toLowerCase().includes(search.toLowerCase());
     return statusMatch && searchMatch;
@@ -104,7 +104,7 @@ export default function AdminOrdersPage() {
 
   const handleExportOrders = () => {
     if (!orders?.length) return toast.error("No order data to export");
-    const data = orders.map((o: any) => ({
+    const data = (Array.isArray(orders) ? orders : []).map((o: any) => ({
       OrderID: o.orderId,
       Customer: o.userId?.fullName || 'Guest',
       Items: o.items.map((i: any) => i.name).join('; '),
@@ -172,7 +172,7 @@ export default function AdminOrdersPage() {
           <div className="bg-surface-container-lowest shadow-sm rounded-2xl p-5 border border-surface-container w-40 flex flex-col justify-center">
             <div className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Due Next 15m</div>
             <div className="text-3xl font-black text-[#8f4e00] font-headline">
-              {isShopOpen ? Math.min(8, filteredOrders.filter((o: any) => o.status === 'Pending').length).toString().padStart(2,'0') : "00"}
+              {isShopOpen ? Math.min(8, (Array.isArray(filteredOrders) ? filteredOrders : []).filter((o: any) => o.status === 'Pending').length).toString().padStart(2,'0') : "00"}
             </div>
           </div>
         </div>
