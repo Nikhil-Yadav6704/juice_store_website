@@ -46,14 +46,14 @@ export default function MenuPage() {
 
     try {
       // Optimistic Update
-      const product = products.find((p: any) => p._id === productId);
+      const product = (products || []).find((p: any) => p._id === productId);
       const currentItems = cartData?.items || [];
-      const itemIndex = currentItems.findIndex((i: any) => (i.productId._id || i.productId) === productId);
+      const itemIndex = currentItems.findIndex((i: any) => (i.productId?._id || i.productId) === productId);
       
       let newItems;
       if (itemIndex > -1) {
         newItems = [...currentItems];
-        newItems[itemIndex] = { ...newItems[itemIndex], quantity: newItems[itemIndex].quantity + 1 };
+        newItems[itemIndex] = { ...newItems[itemIndex], quantity: (newItems[itemIndex].quantity || 0) + 1 };
       } else {
         newItems = [...currentItems, { productId: product, quantity: 1 }];
       }
@@ -183,7 +183,7 @@ export default function MenuPage() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-5 md:px-6 py-2.5 rounded-full text-[12px] md:text-[13px] font-bold transition-all shadow-sm border whitespace-nowrap flex-shrink-0 ${
+              className={`px-5 md:px-6 py-2.5 rounded-full text-[12px] md:text-[13px] font-bold transition-all shadow-sm border whitespace-nowrap flex-shrink-0 cursor-pointer ${
                 selectedCategory === cat
                   ? "bg-primary text-white border-primary shadow-md"
                   : "bg-surface-container-lowest text-on-surface-variant border-surface-container hover:border-primary/30 hover:text-primary"
@@ -235,16 +235,16 @@ export default function MenuPage() {
                         <h3 className="text-[15px] md:text-[17px] font-bold font-headline text-on-surface mb-1.5 md:mb-2">{product.name}</h3>
                         <p className="text-[12px] md:text-[13px] text-on-surface-variant leading-relaxed mb-4 md:mb-5 font-medium flex-grow line-clamp-3">{product.description}</p>
                         <div className="flex items-center justify-between mt-auto">
-                          <span className="text-[16px] md:text-[17px] text-on-surface font-bold">₹{Number(product.price).toFixed(0)}</span>
+                          <span className="text-[16px] md:text-[17px] text-on-surface font-bold">₹{Number(product?.price || 0).toFixed(0)}</span>
                           
                           {qty > 0 ? (
                              <div className="flex items-center gap-2 md:gap-3 bg-surface-container rounded-full p-1 shadow-inner">
-                              <button onClick={() => updateCartQuantity(product._id, "decrement")} className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors"><span className="material-symbols-outlined text-[16px]">remove</span></button>
+                              <button onClick={() => updateCartQuantity(product._id, "decrement")} className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors cursor-pointer"><span className="material-symbols-outlined text-[16px]">remove</span></button>
                               <span className="font-bold text-sm w-4 text-center">{qty}</span>
-                              <button onClick={() => updateCartQuantity(product._id, "add")} className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-sm hover:bg-[#0a4d15] transition-colors"><span className="material-symbols-outlined text-[16px]">add</span></button>
+                              <button onClick={() => updateCartQuantity(product._id, "add")} className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-sm hover:bg-[#0a4d15] transition-colors cursor-pointer"><span className="material-symbols-outlined text-[16px]">add</span></button>
                             </div>
                           ) : (
-                            <button onClick={() => handleAddToCart(product._id)} className="w-10 h-10 rounded-full bg-[#1b4321] text-white flex items-center justify-center shadow-md hover:bg-primary transition-colors">
+                            <button onClick={() => handleAddToCart(product._id)} className="w-10 h-10 rounded-full bg-[#1b4321] text-white flex items-center justify-center shadow-md hover:bg-primary transition-colors cursor-pointer">
                               <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
                             </button>
                           )}

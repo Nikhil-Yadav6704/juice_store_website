@@ -130,7 +130,7 @@ export default function OrdersPage() {
                           
                           <div className="sm:text-right">
                              <div className="font-black text-xl md:text-2xl font-headline text-[#1b4321] mb-1">
-                               ₹{Number(order.grandTotal).toFixed(2)}
+                               ₹{Number(order?.grandTotal || 0).toFixed(2)}
                              </div>
                              <div className="text-[11px] md:text-[12px] text-[#5c6359] font-medium">
                                {order.deliveryType === 'hourly' ? 'Free Delivery' : 'Paid Delivery (₹)'}
@@ -140,7 +140,7 @@ export default function OrdersPage() {
 
                         {/* Items line-up */}
                         <div className="flex flex-wrap gap-3 md:gap-4 mb-5 md:mb-8">
-                          {order.items.map((item: any, idx: number) => (
+                          {(order?.items || []).map((item: any, idx: number) => (
                              <div key={idx} className="bg-[#f2f5ee] rounded-xl md:rounded-2xl p-2 pr-3 md:p-2.5 md:pr-5 flex items-center gap-2 md:gap-3 min-w-0 max-w-full sm:w-[180px] md:w-[200px]">
                                 <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-lg md:rounded-xl overflow-hidden flex items-center justify-center p-1 shadow-sm flex-shrink-0">
                                   <img 
@@ -200,7 +200,7 @@ export default function OrdersPage() {
                                    mutateOrders(); // Revert
                                  }
                                }
-                             }} className="text-[#ba1a1a] font-bold text-[13px] hover:underline transition-all">Cancel Order</button>
+                             }} className="text-[#ba1a1a] font-bold text-[13px] hover:underline transition-all cursor-pointer">Cancel Order</button>
                            ) : (
                              <span className="text-[#5c6359] font-medium text-[12px]">Cannot cancel once prep starts</span>
                            )}
@@ -235,7 +235,7 @@ export default function OrdersPage() {
                           </div>
 
                           <div className="flex items-center gap-4 md:gap-6 sm:justify-end pl-14 sm:pl-0">
-                             <span className="font-bold text-base md:text-lg text-on-surface">₹{Number(order.grandTotal).toFixed(2)}</span>
+                             <span className="font-bold text-base md:text-lg text-on-surface">₹{Number(order?.grandTotal || 0).toFixed(2)}</span>
                              <button onClick={async () => {
                                try {
                                  for (const item of order.items) {
@@ -249,7 +249,7 @@ export default function OrdersPage() {
                                } catch {
                                  toast.error('Failed to reorder. Please try again.');
                                }
-                             }} className="bg-white text-on-surface px-5 md:px-6 py-2 md:py-2.5 rounded-full text-[12px] font-bold shadow-sm hover:shadow transition-shadow border border-[#dce4d5]">
+                             }} className="bg-white text-on-surface px-5 md:px-6 py-2 md:py-2.5 rounded-full text-[12px] font-bold shadow-sm hover:shadow transition-shadow border border-[#dce4d5] cursor-pointer">
                                Reorder
                              </button>
                           </div>
@@ -266,7 +266,7 @@ export default function OrdersPage() {
                 )}
                 
                 {pastOrders.length > (showAllHistory ? Infinity : 5) && !showAllHistory && (
-                  <button onClick={() => setShowAllHistory(true)} className="w-full py-3.5 md:py-4 rounded-[1.25rem] md:rounded-[1.5rem] border-2 border-dashed border-[#c8d4c3] text-[#5c6359] font-bold text-[13px] hover:bg-white hover:border-[#1b4321] transition-all mt-4 md:mt-6">
+                  <button onClick={() => setShowAllHistory(true)} className="w-full py-3.5 md:py-4 rounded-[1.25rem] md:rounded-[1.5rem] border-2 border-dashed border-[#c8d4c3] text-[#5c6359] font-bold text-[13px] hover:bg-white hover:border-[#1b4321] transition-all mt-4 md:mt-6 cursor-pointer">
                     Load More History ({pastOrders.length - 5} more)
                   </button>
                 )}
@@ -285,14 +285,14 @@ export default function OrdersPage() {
                    <div className="relative z-10">
                      <h3 className="font-headline text-lg md:text-xl font-bold text-[#1b4321] mb-2 tracking-tight">Orchard Rewards</h3>
                      <p className="text-[12px] md:text-[13px] text-[#5c6359] font-medium leading-relaxed mb-6 md:mb-8 max-w-[200px]">
-                       {rewardData.rewards.rewardText.replace("{count}", Math.max(0, rewardData.rewards.threshold - (rewardData.juicesCount % rewardData.rewards.threshold)).toString())}
+                       {rewardData?.rewards?.rewardText?.replace("{count}", Math.max(0, (rewardData?.rewards?.threshold || 1) - ((rewardData?.juicesCount || 0) % (rewardData?.rewards?.threshold || 1))).toString()) || ""}
                      </p>
                      
                      <div className="w-full h-2.5 bg-[#dce4d5] rounded-full overflow-hidden mb-3">
-                       <div className="h-full bg-[#1b4321] rounded-full transition-all duration-1000" style={{ width: `${Math.min(100, (rewardData.juicesCount % rewardData.rewards.threshold) / rewardData.rewards.threshold * 100)}%` }}></div>
+                       <div className="h-full bg-[#1b4321] rounded-full transition-all duration-1000" style={{ width: `${Math.min(100, ((rewardData?.juicesCount || 0) % (rewardData?.rewards?.threshold || 1)) / (rewardData?.rewards?.threshold || 1) * 100)}%` }}></div>
                      </div>
                      <div className="text-[9px] font-black tracking-widest uppercase text-[#5c6359]">
-                       {rewardData.juicesCount % rewardData.rewards.threshold}/{rewardData.rewards.threshold} Juices Collected
+                       {(rewardData?.juicesCount || 0) % (rewardData?.rewards?.threshold || 1)}/{(rewardData?.rewards?.threshold || 1)} Juices Collected
                      </div>
                    </div>
                  </div>
@@ -303,11 +303,11 @@ export default function OrdersPage() {
                   <h3 className="font-headline text-[16px] md:text-[17px] font-bold text-on-surface mb-4 md:mb-6 tracking-tight">Need help?</h3>
                   
                   <div className="space-y-2">
-                    <button onClick={() => window.location.href = 'mailto:support@pappujuice.com?subject=Order Support'} className="w-full flex items-center justify-start gap-3 p-3 text-[13px] font-medium text-[#5c6359] hover:text-[#1b4321] hover:bg-white rounded-xl transition-all">
+                    <button onClick={() => window.location.href = 'mailto:support@pappujuice.com?subject=Order Support'} className="w-full flex items-center justify-start gap-3 p-3 text-[13px] font-medium text-[#5c6359] hover:text-[#1b4321] hover:bg-white rounded-xl transition-all cursor-pointer">
                       <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
                       Chat with Support
                     </button>
-                    <button onClick={() => window.location.href = '/about'} className="w-full flex items-center justify-start gap-3 p-3 text-[13px] font-medium text-[#5c6359] hover:text-[#1b4321] hover:bg-white rounded-xl transition-all">
+                    <button onClick={() => window.location.href = '/about'} className="w-full flex items-center justify-start gap-3 p-3 text-[13px] font-medium text-[#5c6359] hover:text-[#1b4321] hover:bg-white rounded-xl transition-all cursor-pointer">
                       <span className="material-symbols-outlined text-[18px]">help_outline</span>
                       Delivery FAQ
                     </button>

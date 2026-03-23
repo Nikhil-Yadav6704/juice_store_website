@@ -77,10 +77,10 @@ export default function AdminUsersPage() {
           <p className="text-on-surface-variant font-medium">Manage your community and oversee account activities.</p>
         </div>
         <div className="flex gap-4">
-          <button onClick={handleExport} className="bg-surface-container-highest text-on-surface px-6 py-3 rounded-full font-bold text-sm hover:bg-outline-variant transition-colors flex items-center gap-2">
+          <button onClick={handleExport} className="bg-surface-container-highest text-on-surface px-6 py-3 rounded-full font-bold text-sm hover:bg-outline-variant transition-colors flex items-center gap-2 cursor-pointer">
             <span className="material-symbols-outlined text-[18px]">download</span> Export CSV
           </button>
-          <button onClick={() => setIsNewUserModalOpen(true)} className="bg-primary text-on-primary px-6 py-3 rounded-full font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+          <button onClick={() => setIsNewUserModalOpen(true)} className="bg-primary text-on-primary px-6 py-3 rounded-full font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer">
             <span className="material-symbols-outlined text-[18px]">person_add</span> New User
           </button>
         </div>
@@ -95,7 +95,7 @@ export default function AdminUsersPage() {
              <option>Wholesale Buyer</option>
              <option>System Administrator</option>
            </select>
-           <button onClick={() => { toast.success("User registered remotely!"); setIsNewUserModalOpen(false); }} className="w-full bg-primary text-on-primary py-3 rounded-xl font-bold mt-2">Send Invitation</button>
+           <button onClick={() => { toast.success("User registered remotely!"); setIsNewUserModalOpen(false); }} className="w-full bg-primary text-on-primary py-3 rounded-xl font-bold mt-2 cursor-pointer">Send Invitation</button>
         </div>
       </Modal>
 
@@ -103,7 +103,7 @@ export default function AdminUsersPage() {
         <div className="space-y-4">
            <label className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4 accent-primary" /> High Value Only ({'>'}10 Orders)</label>
            <label className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4 accent-primary" /> Recently Blocked</label>
-           <button onClick={() => { toast.success("Filters applied"); setIsFilterModalOpen(false); }} className="w-full bg-primary text-on-primary py-3 rounded-xl font-bold mt-4">Apply Search Query</button>
+           <button onClick={() => { toast.success("Filters applied"); setIsFilterModalOpen(false); }} className="w-full bg-primary text-on-primary py-3 rounded-xl font-bold mt-4 cursor-pointer">Apply Search Query</button>
         </div>
       </Modal>
 
@@ -188,7 +188,7 @@ export default function AdminUsersPage() {
             </button>
           ))}
         </div>
-        <button onClick={() => setIsFilterModalOpen(true)} className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center flex-shrink-0">
+        <button onClick={() => setIsFilterModalOpen(true)} className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center flex-shrink-0 cursor-pointer">
           <span className="material-symbols-outlined">filter_list</span>
         </button>
       </div>
@@ -278,11 +278,11 @@ export default function AdminUsersPage() {
                           {user.role !== 'admin' && (
                             <button 
                               onClick={() => handleStatusToggle(user._id, user.status)}
-                              className={`font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-xl transition-colors ${
+                              className={`font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-xl transition-colors cursor-pointer ${
                                 user.status === 'active' 
                                 ? "bg-[#ffdad6] text-[#ba1a1a] hover:bg-[#ba1a1a] hover:text-white" 
                                 : "bg-[#a3f69c] text-[#005312] hover:bg-[#005312] hover:text-[#a3f69c]"
-                              }`}
+                               }`}
                             >
                               {user.status === 'active' ? 'Block Access' : 'Unblock'}
                             </button>
@@ -380,7 +380,7 @@ export default function AdminUsersPage() {
               <p className="text-[10px] font-bold text-primary-fixed uppercase tracking-widest mb-1">Security Status</p>
               <p className="text-xl font-headline font-bold mb-4">All Systems Secure</p>
             </div>
-            <button onClick={() => setIsLogModalOpen(true)} className="relative z-10 w-full bg-[#c4eed0] text-[#0f5223] py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-[#a3f69c] transition-colors">
+            <button onClick={() => setIsLogModalOpen(true)} className="relative z-10 w-full bg-[#c4eed0] text-[#0f5223] py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-[#a3f69c] transition-colors cursor-pointer">
               View Log
             </button>
           </div>

@@ -86,10 +86,10 @@ export default function AdminProductionPage() {
           <h1 className="text-[2.75rem] font-extrabold font-headline text-on-surface tracking-tight leading-none">Production Sheet</h1>
         </div>
         <div className="flex gap-4">
-          <button onClick={handlePrint} className="bg-surface-container-highest text-on-surface px-6 py-3 rounded-full font-bold text-sm hover:bg-outline-variant transition-colors flex items-center gap-2">
+          <button onClick={handlePrint} className="bg-surface-container-highest text-on-surface px-6 py-3 rounded-full font-bold text-sm hover:bg-outline-variant transition-colors flex items-center gap-2 cursor-pointer">
             <span className="material-symbols-outlined text-[18px]">print</span> Print Sheet
           </button>
-          <button onClick={handleExportCSV} className="bg-primary text-on-primary px-6 py-3 rounded-full font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+          <button onClick={handleExportCSV} className="bg-primary text-on-primary px-6 py-3 rounded-full font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer">
             <span className="material-symbols-outlined text-[18px]">download</span> Export CSV
           </button>
         </div>
@@ -167,7 +167,7 @@ export default function AdminProductionPage() {
           {/* Bottom Alerts Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            {alerts && alerts.map((alert: any, i: number) => (
+            {alerts && alerts?.map((alert: any, i: number) => (
               <div key={i} className={`${alert.bgColor || 'bg-[#f2f0e6]'} p-8 rounded-[1.5rem] shadow-sm border ${alert.borderColor || 'border-[#e6e3d5]'}`}>
                 <div className="flex items-center gap-2 mb-4">
                   <span className={`material-symbols-outlined ${alert.textColor || 'text-[#8f4e00]'}`}>{alert.icon || 'warning'}</span>
@@ -221,7 +221,7 @@ export default function AdminProductionPage() {
               )}
             </div>
 
-            <button onClick={() => setIsScheduleModalOpen(true)} className="w-full bg-surface-container-highest text-on-surface font-bold text-xs uppercase tracking-widest py-4 rounded-xl hover:bg-outline-variant transition-colors border border-surface-container">
+            <button onClick={() => setIsScheduleModalOpen(true)} className="w-full bg-surface-container-highest text-on-surface font-bold text-xs uppercase tracking-widest py-4 rounded-xl hover:bg-outline-variant transition-colors border border-surface-container cursor-pointer">
               View Full Schedule
             </button>
           </div>
@@ -284,7 +284,7 @@ export default function AdminProductionPage() {
                 onKeyDown={(e) => e.key === 'Enter' && addReminder()}
                 className="flex-1 bg-surface-container-low p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20 text-sm"
               />
-              <button onClick={addReminder} className="bg-primary text-on-primary px-5 py-3 rounded-xl font-bold text-sm hover:bg-[#005312] transition-colors flex items-center gap-1">
+              <button onClick={addReminder} className="bg-primary text-on-primary px-5 py-3 rounded-xl font-bold text-sm hover:bg-[#005312] transition-colors flex items-center gap-1 cursor-pointer">
                 <span className="material-symbols-outlined text-[18px]">add</span> Add
               </button>
             </div>

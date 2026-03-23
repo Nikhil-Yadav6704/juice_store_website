@@ -59,10 +59,10 @@ export default function AdminDashboard() {
           <p className="text-on-surface-variant mt-1 text-sm font-medium">Real-time vitals for Pappu Juice Corner production and sales.</p>
         </div>
         <div className="flex gap-3 md:gap-4 w-full sm:w-auto">
-          <button onClick={handleExport} className="bg-surface-container-highest text-on-surface px-6 py-2.5 rounded-full font-bold text-sm hover:bg-outline-variant transition-colors flex items-center gap-2">
+          <button onClick={handleExport} className="bg-surface-container-highest text-on-surface px-6 py-2.5 rounded-full font-bold text-sm hover:bg-outline-variant transition-colors flex items-center gap-2 cursor-pointer">
             <span className="material-symbols-outlined text-[18px]">download</span> Export Report
           </button>
-          <button onClick={() => setIsNewOrderModalOpen(true)} className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+          <button onClick={() => setIsNewOrderModalOpen(true)} className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer">
             <span className="material-symbols-outlined text-[18px]">add</span> New Order
           </button>
         </div>
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
               toast.success("Manual POS order instantly queued!");
               setIsNewOrderModalOpen(false);
             }} 
-            className="w-full bg-primary text-on-primary py-4 rounded-xl font-bold mt-4 hover:shadow-lg transition-all"
+            className="w-full bg-primary text-on-primary py-4 rounded-xl font-bold mt-4 hover:shadow-lg transition-all cursor-pointer"
           >
             Process & Queue Order
           </button>
@@ -161,8 +161,8 @@ export default function AdminDashboard() {
               <p className="text-sm text-on-surface-variant mt-1">Revenue performance across the last 30 days.</p>
             </div>
             <div className="bg-surface-container-lowest flex rounded-full p-1 shadow-sm">
-              <button onClick={() => setGrowthView('Monthly')} className={`px-5 py-1.5 text-sm font-bold rounded-full transition-colors ${growthView === 'Monthly' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:text-on-surface'}`}>Monthly</button>
-              <button onClick={() => setGrowthView('Weekly')} className={`px-5 py-1.5 text-sm font-bold rounded-full transition-colors ${growthView === 'Weekly' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:text-on-surface'}`}>Weekly</button>
+              <button onClick={() => setGrowthView('Monthly')} className={`px-5 py-1.5 text-sm font-bold rounded-full transition-colors cursor-pointer ${growthView === 'Monthly' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:text-on-surface'}`}>Monthly</button>
+              <button onClick={() => setGrowthView('Weekly')} className={`px-5 py-1.5 text-sm font-bold rounded-full transition-colors cursor-pointer ${growthView === 'Weekly' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:text-on-surface'}`}>Weekly</button>
             </div>
           </div>
 
@@ -228,11 +228,11 @@ export default function AdminDashboard() {
           <div>
             <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-3">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-4">
-               <Link href="/admin/menu" className="bg-surface-container h-24 rounded-xl flex flex-col items-center justify-center hover:bg-surface-container-high transition-colors text-on-surface">
+               <Link href="/admin/menu" className="bg-surface-container h-24 rounded-xl flex flex-col items-center justify-center hover:bg-surface-container-high transition-colors text-on-surface cursor-pointer">
                  <span className="material-symbols-outlined mb-1 text-primary">restaurant_menu</span>
                  <span className="text-xs font-bold">Update Menu</span>
                </Link>
-               <Link href="/admin/production" className="bg-surface-container h-24 rounded-xl flex flex-col items-center justify-center hover:bg-surface-container-high transition-colors text-on-surface">
+               <Link href="/admin/production" className="bg-surface-container h-24 rounded-xl flex flex-col items-center justify-center hover:bg-surface-container-high transition-colors text-on-surface cursor-pointer">
                  <span className="material-symbols-outlined mb-1 text-secondary">inventory_2</span>
                  <span className="text-xs font-bold">Stock Count</span>
                </Link>
@@ -245,7 +245,7 @@ export default function AdminDashboard() {
       <div className="bg-surface-container p-4 md:p-8 rounded-[1.25rem] md:rounded-[1.5rem] overflow-hidden">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 md:mb-8 gap-3">
           <h3 className="text-lg md:text-xl font-bold font-headline">Top Performing Blends (Monthly)</h3>
-          <Link href="/admin/analytics" className="text-sm font-bold text-primary hover:underline">View All Products</Link>
+          <Link href="/admin/analytics" className="text-sm font-bold text-primary hover:underline cursor-pointer">View All Products</Link>
         </div>
         
         <div className="w-full overflow-x-auto">

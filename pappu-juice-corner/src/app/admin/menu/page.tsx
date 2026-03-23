@@ -85,14 +85,15 @@ export default function AdminMenuPage() {
   };
 
   const handleAddProduct = async () => {
-    if (!addName.trim() || !addPrice) return toast.error("Name and price are required.");
+    const priceNum = Number(addPrice);
+    if (!addName.trim() || isNaN(priceNum)) return toast.error("Valid name and price are required.");
     try {
       const res = await fetch('/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: addName.trim(),
-          price: Number(addPrice),
+          price: priceNum,
           category: addCategory,
           description: addDescription.trim(),
           imageUrl: addImageUrl.trim() || 'https://images.unsplash.com/photo-1622597467836-f38240662c8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
@@ -111,14 +112,15 @@ export default function AdminMenuPage() {
   };
 
   const handleEditProduct = async () => {
-    if (!editName.trim() || !editPrice) return toast.error("Name and price are required.");
+    const priceNum = Number(editPrice);
+    if (!editName.trim() || isNaN(priceNum)) return toast.error("Valid name and price are required.");
     try {
       const res = await fetch(`/api/products/${editId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: editName.trim(),
-          price: Number(editPrice),
+          price: priceNum,
           category: editCategory,
           description: editDescription.trim(),
           imageUrl: editImageUrl.trim()
@@ -193,7 +195,7 @@ export default function AdminMenuPage() {
   const handleToggleVisibility = async (id: string, currentStatus: boolean) => {
     try {
       // Optimistic Update
-      const newProducts = products.map((p: any) => 
+      const newProducts = (products || []).map((p: any) => 
         p._id === id ? { ...p, isVisible: !currentStatus } : p
       );
       mutate(newProducts, false);
@@ -239,7 +241,7 @@ export default function AdminMenuPage() {
           <p className="text-on-surface-variant font-medium">Curate your seasonal offerings and wellness blends.</p>
         </div>
         <div className="flex gap-4">
-          <button onClick={() => setIsAddModalOpen(true)} className="bg-primary text-on-primary px-6 py-3 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2">
+          <button onClick={() => setIsAddModalOpen(true)} className="bg-primary text-on-primary px-6 py-3 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2 cursor-pointer">
             <span className="material-symbols-outlined text-[18px]">add</span> Add Product
           </button>
         </div>
@@ -283,7 +285,7 @@ export default function AdminMenuPage() {
              </div>
              <input type="url" placeholder="https://..." value={addImageUrl} onChange={e => setAddImageUrl(e.target.value)} className="w-full bg-surface-container-low p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20 mt-2 text-sm" />
            </div>
-           <button onClick={handleAddProduct} className="w-full bg-primary text-on-primary py-3 rounded-xl font-bold mt-2">Save Product</button>
+           <button onClick={handleAddProduct} className="w-full bg-primary text-on-primary py-3 rounded-xl font-bold mt-2 cursor-pointer">Save Product</button>
         </div>
       </Modal>
 
@@ -324,7 +326,7 @@ export default function AdminMenuPage() {
              </div>
              <input type="url" placeholder="https://..." value={editImageUrl} onChange={e => setEditImageUrl(e.target.value)} className="w-full bg-surface-container-low p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20 mt-2 text-sm" />
            </div>
-           <button onClick={handleEditProduct} className="w-full bg-primary text-on-primary py-3 rounded-xl font-bold mt-2">Update Product</button>
+           <button onClick={handleEditProduct} className="w-full bg-primary text-on-primary py-3 rounded-xl font-bold mt-2 cursor-pointer">Update Product</button>
         </div>
       </Modal>
 
@@ -348,7 +350,7 @@ export default function AdminMenuPage() {
            })}
            <div className="flex gap-2 mt-4">
              <input type="text" placeholder="New Category Name..." value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddCategory()} className="flex-1 bg-surface-container-low p-3 rounded-xl outline-none focus:ring-2 focus:ring-primary/20" />
-             <button onClick={handleAddCategory} className="bg-primary text-on-primary px-5 py-3 rounded-xl font-bold">Add</button>
+             <button onClick={handleAddCategory} className="bg-primary text-on-primary px-5 py-3 rounded-xl font-bold cursor-pointer">Add</button>
            </div>
         </div>
       </Modal>
@@ -359,7 +361,7 @@ export default function AdminMenuPage() {
            <div className="bg-[#f2f0e6] p-4 border border-[#e6e3d5] text-[#8f4e00] rounded-xl font-bold">
               Functionality locked in preview environment.
            </div>
-           <button onClick={() => setIsBulkEditModalOpen(false)} className="w-full bg-surface-container-highest text-on-surface py-3 rounded-xl font-bold">Close Editor</button>
+           <button onClick={() => setIsBulkEditModalOpen(false)} className="w-full bg-surface-container-highest text-on-surface py-3 rounded-xl font-bold cursor-pointer">Close Editor</button>
         </div>
       </Modal>
 
@@ -408,7 +410,7 @@ export default function AdminMenuPage() {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`text-left px-5 py-3 rounded-2xl font-medium transition-colors ${
+                  className={`text-left px-5 py-3 rounded-2xl font-medium transition-colors cursor-pointer ${
                     activeCategory === cat 
                     ? "bg-primary-fixed text-[#002204] font-bold shadow-sm"
                     : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
@@ -417,7 +419,7 @@ export default function AdminMenuPage() {
                   {cat}
                 </button>
               ))}
-              <button onClick={() => setIsEditCatModalOpen(true)} className="text-left px-5 py-3 mt-4 rounded-2xl font-bold text-on-surface-variant border-2 border-dashed border-outline-variant hover:bg-surface-container transition-colors">
+              <button onClick={() => setIsEditCatModalOpen(true)} className="text-left px-5 py-3 mt-4 rounded-2xl font-bold text-on-surface-variant border-2 border-dashed border-outline-variant hover:bg-surface-container transition-colors cursor-pointer">
                 + Create New Category
               </button>
             </div>
@@ -457,10 +459,10 @@ export default function AdminMenuPage() {
               />
             </div>
             <div className="flex gap-2">
-              <button onClick={() => setIsBulkEditModalOpen(true)} className="bg-surface-container px-4 py-2.5 rounded-full text-sm font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors flex items-center gap-2">
+              <button onClick={() => setIsBulkEditModalOpen(true)} className="bg-surface-container px-4 py-2.5 rounded-full text-sm font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors flex items-center gap-2 cursor-pointer">
                 <span className="material-symbols-outlined text-[18px]">edit</span> Bulk Edit (12)
               </button>
-              <button onClick={() => setIsFilterModalOpen(true)} className="bg-surface-container px-4 py-2.5 rounded-full text-sm font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors flex items-center gap-2">
+              <button onClick={() => setIsFilterModalOpen(true)} className="bg-surface-container px-4 py-2.5 rounded-full text-sm font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors flex items-center gap-2 cursor-pointer">
                 <span className="material-symbols-outlined text-[18px]">filter_list</span> Filter
               </button>
             </div>
@@ -512,13 +514,13 @@ export default function AdminMenuPage() {
                       </td>
                       <td className="px-8 py-6 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleToggleVisibility(product._id, product.isVisible)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface-variant hover:text-primary transition-colors" title="Toggle Visibility">
+                          <button onClick={() => handleToggleVisibility(product._id, product.isVisible)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface-variant hover:text-primary transition-colors cursor-pointer" title="Toggle Visibility">
                             <span className="material-symbols-outlined text-[18px]">{product.isVisible ? "visibility_off" : "visibility"}</span>
                           </button>
-                          <button onClick={() => openEditModal(product)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface-variant hover:text-secondary transition-colors" title="Edit Product">
+                          <button onClick={() => openEditModal(product)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" title="Edit Product">
                             <span className="material-symbols-outlined text-[18px]">edit</span>
                           </button>
-                          <button onClick={() => handleDeleteProduct(product._id, product.name)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface-variant hover:text-error transition-colors" title="Delete Product">
+                          <button onClick={() => handleDeleteProduct(product._id, product.name)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface-variant hover:text-error transition-colors cursor-pointer" title="Delete Product">
                             <span className="material-symbols-outlined text-[18px]">delete</span>
                           </button>
                         </div>
@@ -533,11 +535,11 @@ export default function AdminMenuPage() {
           <div className="px-8 py-5 border-t border-surface-container flex justify-between items-center bg-[#fcfdfa]">
             <p className="text-sm text-on-surface-variant font-medium">Showing {Math.min(menuPage * MENU_PER_PAGE, filteredProducts?.length || 0)} of {filteredProducts?.length || 0} products{filterApplied ? ' (filtered)' : ''}</p>
             <div className="flex gap-2">
-              <button disabled={menuPage === 1} onClick={() => setMenuPage(p => Math.max(1, p - 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-40"><span className="material-symbols-outlined text-[18px]">chevron_left</span></button>
+              <button disabled={menuPage === 1} onClick={() => setMenuPage(p => Math.max(1, p - 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-40 cursor-pointer disabled:cursor-default"><span className="material-symbols-outlined text-[18px]">chevron_left</span></button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                <button key={p} onClick={() => setMenuPage(p)} className={`w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm transition-colors ${menuPage === p ? 'bg-primary text-on-primary' : 'bg-transparent text-on-surface-variant hover:bg-surface-container'}`}>{p}</button>
+                <button key={p} onClick={() => setMenuPage(p)} className={`w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm transition-colors cursor-pointer ${menuPage === p ? 'bg-primary text-on-primary' : 'bg-transparent text-on-surface-variant hover:bg-surface-container'}`}>{p}</button>
               ))}
-              <button disabled={menuPage === totalPages} onClick={() => setMenuPage(p => Math.min(totalPages, p + 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-40"><span className="material-symbols-outlined text-[18px]">chevron_right</span></button>
+              <button disabled={menuPage === totalPages} onClick={() => setMenuPage(p => Math.min(totalPages, p + 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-40 cursor-pointer disabled:cursor-default"><span className="material-symbols-outlined text-[18px]">chevron_right</span></button>
           </div>
           </div>
 

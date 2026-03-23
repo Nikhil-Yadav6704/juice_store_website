@@ -91,7 +91,8 @@ export default function CartPage() {
       const data = await res.json();
       if (res.ok) {
         toast.success(`Order placed successfully!`);
-        mutateCart();
+        // Immediately clear local cart cache to prevent stale data (Problem 1 & 3)
+        mutateCart({ items: [] }, false);
         router.push("/orders");
       } else {
         toast.error(data.message || "Failed to place order");
@@ -185,7 +186,7 @@ export default function CartPage() {
             </div>
             <h2 className="text-2xl md:text-3xl font-extrabold text-on-surface mb-3 font-headline tracking-tight">Your harvest is empty</h2>
             <p className="text-[#5c6359] mb-8 md:mb-10 text-base md:text-lg">You haven't added any botanicals to your cart yet.</p>
-            <button onClick={() => router.push("/menu")} className="bg-[#1b4321] text-white px-8 md:px-10 py-3.5 md:py-4 rounded-full font-bold shadow-md hover:bg-primary transition-colors flex items-center gap-2">
+            <button onClick={() => router.push("/menu")} className="bg-[#1b4321] text-white px-8 md:px-10 py-3.5 md:py-4 rounded-full font-bold shadow-md hover:bg-primary transition-colors flex items-center gap-2 cursor-pointer">
               Explore Our Menu <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
             </button>
           </div>
@@ -202,7 +203,7 @@ export default function CartPage() {
 
               <div className="space-y-3 md:space-y-4">
                 {cartItems.map((item: any) => (
-                  <div key={item._id} className="bg-white rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-surface-container flex flex-col sm:flex-row gap-4 md:gap-6 sm:items-center relative group">
+                  <div key={item._id || item.productId?._id} className="bg-white rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-surface-container flex flex-col sm:flex-row gap-4 md:gap-6 sm:items-center relative group">
                     <div className="w-20 h-20 md:w-24 md:h-24 bg-surface-container-low rounded-[1rem] p-2 flex-shrink-0 flex items-center justify-center overflow-hidden">
                       <img src={item.productId.imageUrl} alt={item.productId.name} className="h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-500" />
                     </div>
@@ -216,11 +217,11 @@ export default function CartPage() {
                       <div className="flex items-center justify-between sm:justify-end w-full sm:w-1/2 gap-4 md:gap-6">
                          
                          <div className="flex items-center gap-3 md:gap-4 bg-[#f2f5ee] rounded-full px-2 py-1.5 shadow-inner">
-                           <button onClick={() => updateQuantity(item.productId._id, "decrement")} className="w-7 h-7 flex items-center justify-center rounded-full bg-white text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors">
+                           <button onClick={() => updateQuantity(item.productId._id, "decrement")} className="w-7 h-7 flex items-center justify-center rounded-full bg-white text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors cursor-pointer">
                              <span className="material-symbols-outlined text-[14px]">remove</span>
                            </button>
                            <span className="font-bold text-[13px] w-3 text-center">{item.quantity}</span>
-                           <button onClick={() => updateQuantity(item.productId._id, "add")} className="w-7 h-7 flex items-center justify-center rounded-full bg-white text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors">
+                           <button onClick={() => updateQuantity(item.productId._id, "add")} className="w-7 h-7 flex items-center justify-center rounded-full bg-white text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors cursor-pointer">
                              <span className="material-symbols-outlined text-[14px]">add</span>
                            </button>
                          </div>
@@ -229,7 +230,7 @@ export default function CartPage() {
                            ₹{Number(item.productId.price).toFixed(2)}
                          </p>
 
-                         <button onClick={() => updateQuantity(item.productId._id, "remove")} className="flex items-center gap-1 text-[#ba1a1a] hover:text-[#93000a] text-[10px] uppercase font-bold tracking-widest transition-colors pl-2">
+                         <button onClick={() => updateQuantity(item.productId._id, "remove")} className="flex items-center gap-1 text-[#ba1a1a] hover:text-[#93000a] text-[10px] uppercase font-bold tracking-widest transition-colors pl-2 cursor-pointer">
                            <span className="material-symbols-outlined text-[14px]">delete</span>
                            <span className="hidden sm:inline">Remove</span>
                          </button>
@@ -253,7 +254,7 @@ export default function CartPage() {
                       .filter((p: any) => !cartItems.some((item: any) => item.productId._id === p._id))
                       .slice(0, 2)
                       .map((product: any) => (
-                        <div key={product._id} className="bg-white rounded-xl md:rounded-2xl p-3 md:p-5 shadow-sm flex flex-col items-center text-center group">
+                        <div key={product._id || product.id} className="bg-white rounded-xl md:rounded-2xl p-3 md:p-5 shadow-sm flex flex-col items-center text-center group">
                           <div className="w-full h-20 md:h-28 overflow-hidden rounded-lg md:rounded-xl mb-3 md:mb-4">
                             <img 
                               src={product.imageUrl} 
@@ -268,7 +269,7 @@ export default function CartPage() {
                           <p className="text-primary font-bold text-[11px] md:text-xs mb-3 md:mb-4">+₹{Number(product.price).toFixed(0)}</p>
                           <button 
                             onClick={() => updateQuantity(product._id, "add")} 
-                            className="w-full py-2 bg-[#f2f5ee] hover:bg-[#e4ebdd] text-[#1b4321] text-[11px] md:text-xs font-bold rounded-full transition-colors flex items-center justify-center gap-1"
+                            className="w-full py-2 bg-[#f2f5ee] hover:bg-[#e4ebdd] text-[#1b4321] text-[11px] md:text-xs font-bold rounded-full transition-colors flex items-center justify-center gap-1 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[14px]">add_shopping_cart</span>
                             Add
@@ -291,7 +292,7 @@ export default function CartPage() {
                   
                   <label className={`flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${deliveryType === "hourly" ? "border-primary bg-[#f0f9ed]" : "border-surface-container hover:border-outline-variant"}`}>
                     <div className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 flex items-center justify-center mt-1">
-                       <input type="radio" value="hourly" checked={deliveryType === "hourly"} onChange={() => setDeliveryType("hourly")} className="w-4 h-4 text-primary accent-primary" />
+                       <input type="radio" value="hourly" checked={deliveryType === "hourly"} onChange={() => setDeliveryType("hourly")} className="w-4 h-4 text-primary accent-primary cursor-pointer" />
                     </div>
                     <div className="w-9 h-9 md:w-10 md:h-10 bg-[#e4ebdd] rounded-full flex items-center justify-center flex-shrink-0 text-primary mt-1">
                        <span className="material-symbols-outlined text-[16px] md:text-[18px]">group</span>
@@ -312,7 +313,7 @@ export default function CartPage() {
 
                   <label className={`flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${deliveryType === "instant" ? "border-primary bg-[#f0f9ed]" : "border-surface-container hover:border-outline-variant"}`}>
                     <div className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 flex items-center justify-center mt-1">
-                       <input type="radio" value="instant" checked={deliveryType === "instant"} onChange={() => setDeliveryType("instant")} className="w-4 h-4 text-primary accent-primary" />
+                       <input type="radio" value="instant" checked={deliveryType === "instant"} onChange={() => setDeliveryType("instant")} className="w-4 h-4 text-primary accent-primary cursor-pointer" />
                     </div>
                     <div className="w-9 h-9 md:w-10 md:h-10 bg-[#fbdfc6] rounded-full flex items-center justify-center flex-shrink-0 text-[#8f4e00] mt-1">
                        <span className="material-symbols-outlined text-[16px] md:text-[18px]">bolt</span>
@@ -333,7 +334,7 @@ export default function CartPage() {
 
                   <label className={`flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${deliveryType === "super_instant" ? "border-primary bg-[#f0f9ed]" : "border-surface-container hover:border-outline-variant"}`}>
                     <div className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 flex items-center justify-center mt-1">
-                       <input type="radio" value="super_instant" checked={deliveryType === "super_instant"} onChange={() => setDeliveryType("super_instant")} className="w-4 h-4 text-primary accent-primary" />
+                       <input type="radio" value="super_instant" checked={deliveryType === "super_instant"} onChange={() => setDeliveryType("super_instant")} className="w-4 h-4 text-primary accent-primary cursor-pointer" />
                     </div>
                     <div className="w-9 h-9 md:w-10 md:h-10 bg-[#a3f69c] rounded-full flex items-center justify-center flex-shrink-0 text-[#005312] mt-1">
                        <span className="material-symbols-outlined text-[16px] md:text-[18px]">rocket_launch</span>
@@ -386,7 +387,7 @@ export default function CartPage() {
                   disabled={placingOrder || !isShopOpen}
                   className={`w-full py-4 md:py-5 rounded-full font-bold shadow-lg transition-colors flex justify-center items-center gap-3 relative overflow-visible ${
                     isShopOpen 
-                    ? "bg-[#1b4321] text-white hover:bg-primary shadow-lg" 
+                    ? "bg-[#1b4321] text-white hover:bg-primary shadow-lg cursor-pointer" 
                     : "bg-surface-container-highest text-on-surface-variant cursor-not-allowed grayscale shadow-none"
                   }`}
                 >
@@ -421,7 +422,7 @@ export default function CartPage() {
                 {/* Promo Code Input */}
                 <div className="flex gap-2 mt-6 md:mt-8">
                   <input type="text" placeholder="Promo code" className="flex-1 bg-surface-container-lowest border border-white/50 rounded-full px-4 md:px-5 py-2.5 md:py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary shadow-inner text-on-surface placeholder:text-[#5c6359] placeholder:font-medium min-w-0" />
-                  <button onClick={() => toast.error("Invalid Promo Code")} className="bg-[#e4ebdd] hover:bg-[#d1ecb4] text-[#1b4321] px-5 md:px-6 py-2.5 md:py-3 rounded-full text-sm font-bold transition-colors flex-shrink-0">Apply</button>
+                  <button onClick={() => toast.error("Invalid Promo Code")} className="bg-[#e4ebdd] hover:bg-[#d1ecb4] text-[#1b4321] px-5 md:px-6 py-2.5 md:py-3 rounded-full text-sm font-bold transition-colors flex-shrink-0 cursor-pointer">Apply</button>
                 </div>
               </div>
 
