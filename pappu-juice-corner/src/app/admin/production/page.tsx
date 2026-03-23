@@ -9,8 +9,16 @@ import { exportToCSV } from "@/lib/exportCsv";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function AdminProductionPage() {
-  const { data: productionData, isLoading } = useSWR("/api/admin/production", fetcher, { refreshInterval: 10000 });
-  const { data: dashboardData } = useSWR("/api/admin/dashboard", fetcher, { refreshInterval: 10000 });
+  const { data: productionData, isLoading } = useSWR("/api/admin/production", fetcher, { 
+    refreshInterval: 30000,
+    dedupingInterval: 10000,
+    revalidateOnFocus: false
+  });
+  const { data: dashboardData } = useSWR("/api/admin/dashboard", fetcher, { 
+    refreshInterval: 60000,
+    dedupingInterval: 30000,
+    revalidateOnFocus: false
+  });
 
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);

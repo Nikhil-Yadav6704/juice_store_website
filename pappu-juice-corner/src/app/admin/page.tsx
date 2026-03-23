@@ -6,14 +6,21 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Modal from "@/components/Modal";
 import { exportToCSV } from "@/lib/exportCsv";
+import CountdownTimer from "@/components/CountdownTimer";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function AdminDashboard() {
-  const { data: dashboardData, isLoading } = useSWR("/api/admin/dashboard", fetcher);
-  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000 });
+  const { data: dashboardData, isLoading } = useSWR("/api/admin/dashboard", fetcher, {
+    refreshInterval: 60000,
+    dedupingInterval: 30000,
+    revalidateOnFocus: false
+  });
+  const { data: liveData } = useSWR("/api/orders/live", fetcher, { 
+    refreshInterval: 30000,
+    dedupingInterval: 10000
+  });
   
-  const [timeLeft, setTimeLeft] = useState("");
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
   const [growthView, setGrowthView] = useState<'Monthly' | 'Weekly'>('Monthly');
 
@@ -40,22 +47,6 @@ export default function AdminDashboard() {
     toast.success("Dashboard export complete");
   };
 
-  useEffect(() => {
-    if (!liveData?.nextBatchEnd) return;
-    const interval = setInterval(() => {
-      const target = new Date(liveData.nextBatchEnd).getTime();
-      const now = new Date().getTime();
-      const difference = target - now;
-      if (difference <= 0) {
-        setTimeLeft("00:00");
-        return;
-      }
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-      setTimeLeft(`${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [liveData]);
 
   if (isLoading) return <div className="p-8 text-xl font-bold">Loading dashboard...</div>;
 
@@ -136,7 +127,9 @@ export default function AdminDashboard() {
           </div>
           <div>
             <p className="text-xs font-bold text-[#8f4e00] uppercase tracking-widest mb-1">Next Cold-Press Batch</p>
-            <p className="text-[2.5rem] md:text-[4rem] leading-none font-black text-[#8f4e00] font-headline tracking-tighter">{timeLeft || "14:22"}</p>
+            <p className="text-[2.5rem] md:text-[4rem] leading-none font-black text-[#8f4e00] font-headline tracking-tighter">
+              {liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} /> : "14:22"}
+            </p>
           </div>
         </div>
 

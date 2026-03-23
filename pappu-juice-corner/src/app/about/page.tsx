@@ -9,7 +9,10 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function AboutPage() {
   const [email, setEmail] = useState("");
-  const { data: settings } = useSWR("/api/settings", fetcher);
+  const { data: settings } = useSWR("/api/settings", fetcher, {
+    dedupingInterval: 300000,
+    revalidateOnFocus: false
+  });
 
   const handleSubscribe = () => {
     if (!email.trim() || !email.includes("@")) return toast.error("Please enter a valid email.");

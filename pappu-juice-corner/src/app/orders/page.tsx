@@ -8,10 +8,22 @@ import CountdownTimer from "@/components/CountdownTimer";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function OrdersPage() {
-  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000, dedupingInterval: 5000 });
-  const { data: rewardData } = useSWR("/api/user/rewards", fetcher, { dedupingInterval: 300000 });
-  const { data: orders, isLoading, mutate: mutateOrders } = useSWR("/api/orders", fetcher, { dedupingInterval: 30000 });
-  const { data: settings } = useSWR("/api/settings", fetcher);
+  const { data: liveData } = useSWR("/api/orders/live", fetcher, { 
+    refreshInterval: 30000, 
+    dedupingInterval: 10000 
+  });
+  const { data: rewardData } = useSWR("/api/user/rewards", fetcher, { 
+    dedupingInterval: 300000,
+    revalidateOnFocus: false 
+  });
+  const { data: orders, isLoading, mutate: mutateOrders } = useSWR("/api/orders", fetcher, { 
+    dedupingInterval: 30000,
+    revalidateOnFocus: false
+  });
+  const { data: settings } = useSWR("/api/settings", fetcher, {
+    dedupingInterval: 300000,
+    revalidateOnFocus: false
+  });
   
   // Shop Status Logic
   const shopSettings = settings?.shop || { isManualClose: false, openingTime: "09:00", closingTime: "21:00" };

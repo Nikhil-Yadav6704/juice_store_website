@@ -17,7 +17,10 @@ export default function MenuPage() {
   const { data: cartData, mutate: mutateCart } = useSWR(
     session?.user ? ["/api/cart", session.user.id] : null,
     fetcher,
-    { dedupingInterval: 500, revalidateOnFocus: true, revalidateOnMount: true }
+    { 
+      dedupingInterval: 10000,
+      revalidateOnFocus: false 
+    }
   );
   const [selectedCategory, setSelectedCategory] = useState("All");
 

@@ -16,9 +16,18 @@ export default function CartPage() {
     fetcher, 
     { dedupingInterval: 500, revalidateOnFocus: true, revalidateOnMount: true }
   );
-  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000, dedupingInterval: 2000 });
-  const { data: settings } = useSWR("/api/settings", fetcher, { dedupingInterval: 300000, revalidateOnFocus: false });
-  const { data: allProducts } = useSWR("/api/products", fetcher);
+  const { data: liveData } = useSWR("/api/orders/live", fetcher, { 
+    refreshInterval: 30000, 
+    dedupingInterval: 10000 
+  });
+  const { data: settings } = useSWR("/api/settings", fetcher, { 
+    dedupingInterval: 300000, 
+    revalidateOnFocus: false 
+  });
+  const { data: allProducts } = useSWR("/api/products", fetcher, {
+    dedupingInterval: 300000,
+    revalidateOnFocus: false
+  });
   
   const [deliveryType, setDeliveryType] = useState("hourly");
   const [placingOrder, setPlacingOrder] = useState(false);

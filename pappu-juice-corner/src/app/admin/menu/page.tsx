@@ -8,7 +8,10 @@ import Modal from "@/components/Modal";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function AdminMenuPage() {
-  const { data: products, error, isLoading, mutate } = useSWR("/api/products?all=true", fetcher);
+  const { data: products, error, isLoading, mutate } = useSWR("/api/products?all=true", fetcher, {
+    dedupingInterval: 30000,
+    revalidateOnFocus: false
+  });
   
   const [activeCategory, setActiveCategory] = useState("All Blends");
   const [search, setSearch] = useState("");

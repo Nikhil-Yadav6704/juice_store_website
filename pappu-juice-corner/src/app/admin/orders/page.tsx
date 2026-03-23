@@ -9,9 +9,18 @@ import CountdownTimer from "@/components/CountdownTimer";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function AdminOrdersPage() {
-  const { data: orders, error, isLoading, mutate } = useSWR("/api/admin/orders", fetcher, { dedupingInterval: 30000 });
-  const { data: liveData } = useSWR("/api/orders/live", fetcher, { refreshInterval: 5000, dedupingInterval: 5000 });
-  const { data: settings, mutate: mutateSettings } = useSWR("/api/admin/settings", fetcher);
+  const { data: orders, error, isLoading, mutate } = useSWR("/api/admin/orders", fetcher, { 
+    dedupingInterval: 30000,
+    revalidateOnFocus: false 
+  });
+  const { data: liveData } = useSWR("/api/orders/live", fetcher, { 
+    refreshInterval: 30000, 
+    dedupingInterval: 10000 
+  });
+  const { data: settings, mutate: mutateSettings } = useSWR("/api/admin/settings", fetcher, {
+    dedupingInterval: 60000,
+    revalidateOnFocus: false
+  });
   
   const toggleShopStatus = async () => {
     if (!settings) return;

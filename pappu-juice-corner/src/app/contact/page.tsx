@@ -15,7 +15,10 @@ export default function ContactPage() {
     message: "",
   });
   const [submitting, setSubmitting] = useState(false);
-  const { data: settings } = useSWR("/api/settings", fetcher);
+  const { data: settings } = useSWR("/api/settings", fetcher, {
+    dedupingInterval: 300000,
+    revalidateOnFocus: false
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -7,7 +7,10 @@ import toast from "react-hot-toast";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ProfilePage() {
-  const { data: user, mutate } = useSWR("/api/users/profile", fetcher);
+  const { data: user, mutate } = useSWR("/api/users/profile", fetcher, {
+    dedupingInterval: 60000,
+    revalidateOnFocus: false
+  });
   
   const [formData, setFormData] = useState({
     fullName: "",

@@ -12,7 +12,10 @@ export default function FloatingCart() {
   const { data: cartData } = useSWR(
     session?.user ? ["/api/cart", session.user.id] : null,
     fetcher,
-    { dedupingInterval: 500 }
+    { 
+      dedupingInterval: 10000,
+      revalidateOnFocus: false 
+    }
   );
 
   if (!session || session.user?.role === "admin") {

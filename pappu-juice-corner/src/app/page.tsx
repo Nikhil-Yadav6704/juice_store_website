@@ -8,7 +8,10 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function Home() {
   const { data: session } = useSession();
-  const { data: settings } = useSWR("/api/settings", fetcher);
+  const { data: settings } = useSWR("/api/settings", fetcher, {
+    dedupingInterval: 300000,
+    revalidateOnFocus: false
+  });
 
   return (
     <div className="bg-surface selection:bg-[#d1ecb4] selection:text-[#005312] pt-4 md:pt-12">

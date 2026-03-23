@@ -9,7 +9,10 @@ import { exportToCSV } from "@/lib/exportCsv";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function AdminUsersPage() {
-  const { data: users, error, isLoading, mutate } = useSWR("/api/admin/users", fetcher);
+  const { data: users, error, isLoading, mutate } = useSWR("/api/admin/users", fetcher, {
+    dedupingInterval: 30000,
+    revalidateOnFocus: false
+  });
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
 
