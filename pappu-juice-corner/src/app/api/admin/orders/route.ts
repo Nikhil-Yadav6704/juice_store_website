@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
 import Order from "@/models/Order";
 import User from "@/models/User"; // Ensure model is registered for populate
+import Product from "@/models/Product"; // Ensure model is registered for populate
 
 export async function GET() {
   try {

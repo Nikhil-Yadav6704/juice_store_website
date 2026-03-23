@@ -55,7 +55,11 @@ export async function PUT(req: Request) {
     }
 
     await user.save();
-    return NextResponse.json({ message: "Profile updated successfully", user });
+    return NextResponse.json({ 
+      message: "Profile updated successfully", 
+      user, 
+      profile: user // Satisfy any frontend expecting .profile
+    });
   } catch (error: any) {
     console.error("Profile PUT API error:", error.message, error.stack);
     return NextResponse.json({ message: "Failed to update profile", error: error.message }, { status: 500 });
