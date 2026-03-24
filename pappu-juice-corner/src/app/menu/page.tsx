@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
@@ -25,6 +25,45 @@ export default function MenuPage() {
   );
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  // Debounce helper
+  const debounce = (fn: Function, ms: number) => {
+    let timeoutId: any;
+    return (...args: any[]) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => fn(...args), ms);
+    };
+  };
+
+  const performCartUpdate = async (productId: string, action: string) => {
+    try {
+      const res = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, action }),
+      });
+
+      if (res.status === 409) {
+        // Write conflict - wait 100ms and retry once
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const retryRes = await fetch("/api/cart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId, action }),
+        });
+        if (!retryRes.ok) throw new Error();
+      } else if (!res.ok) {
+        throw new Error();
+      }
+      
+      mutateCart();
+    } catch {
+      toast.error("Failed to update cart");
+      mutateCart(); // Revert
+    }
+  };
+
+  const debouncedUpdate = useMemo(() => debounce(performCartUpdate, 300), [mutateCart]);
+
   const handleAddToCart = async (productId: string) => {
     if (!session) {
       toast.custom((t) => (
@@ -45,68 +84,40 @@ export default function MenuPage() {
       return;
     }
 
-    try {
-      // Optimistic Update
-      const product = (products || []).find((p: any) => p._id === productId);
-      const currentItems = cartData?.items || [];
-      const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
-      
-      let newItems;
-      if (itemIndex > -1) {
-        newItems = [...currentItems];
-        newItems[itemIndex] = { ...newItems[itemIndex], quantity: (newItems[itemIndex].quantity || 0) + 1 };
-      } else {
-        newItems = [...currentItems, { productId: product, quantity: 1 }];
-      }
-      
-      mutateCart({ ...cartData, items: newItems }, false);
-
-      const res = await fetch("/api/cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, action: "add" }),
-      });
-      if (res.ok) {
-        toast.success("Added to cart!");
-        mutateCart();
-      } else {
-        throw new Error();
-      }
-    } catch {
-      toast.error("Failed to add to cart");
-      mutateCart(); // Revert on failure
+    // Optimistic Update
+    const product = (products || []).find((p: any) => p._id === productId);
+    const currentItems = cartData?.items || [];
+    const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
+    
+    let newItems;
+    if (itemIndex > -1) {
+      newItems = [...currentItems];
+      newItems[itemIndex] = { ...newItems[itemIndex], quantity: (newItems[itemIndex].quantity || 0) + 1 };
+    } else {
+      newItems = [...currentItems, { productId: product, quantity: 1 }];
     }
+    
+    mutateCart({ ...cartData, items: newItems }, false);
+    debouncedUpdate(productId, "add");
   };
 
   const updateCartQuantity = async (productId: string, action: "add" | "decrement") => {
-    try {
-      // Optimistic Update
-      const currentItems = cartData?.items || [];
-      const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
+    // Optimistic Update
+    const currentItems = cartData?.items || [];
+    const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
+    
+    if (itemIndex > -1) {
+      const newItems = [...currentItems];
+      const newQty = action === "add" ? newItems[itemIndex].quantity + 1 : newItems[itemIndex].quantity - 1;
       
-      if (itemIndex > -1) {
-        const newItems = [...currentItems];
-        const newQty = action === "add" ? newItems[itemIndex].quantity + 1 : newItems[itemIndex].quantity - 1;
-        
-        if (newQty <= 0) {
-          newItems.splice(itemIndex, 1);
-        } else {
-          newItems[itemIndex] = { ...newItems[itemIndex], quantity: newQty };
-        }
-        
-        mutateCart({ ...cartData, items: newItems }, false);
+      if (newQty <= 0) {
+        newItems.splice(itemIndex, 1);
+      } else {
+        newItems[itemIndex] = { ...newItems[itemIndex], quantity: newQty };
       }
-
-      const res = await fetch("/api/cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, action }),
-      });
-      if (!res.ok) throw new Error();
-      mutateCart();
-    } catch {
-      toast.error("Failed to update cart");
-      mutateCart(); // Revert
+      
+      mutateCart({ ...cartData, items: newItems }, false);
+      debouncedUpdate(productId, action);
     }
   };
 

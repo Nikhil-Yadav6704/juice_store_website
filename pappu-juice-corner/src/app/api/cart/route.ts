@@ -19,7 +19,22 @@ export async function GET() {
       return NextResponse.json({ items: [] });
     }
 
-    return NextResponse.json(cart);
+    // Deduplicate items (Safety fallback)
+    const mergedItems: any[] = [];
+    const itemMap = new Map();
+
+    cart.items.forEach((item: any) => {
+      const pid = item.productId?._id?.toString() || item.productId?.toString();
+      if (itemMap.has(pid)) {
+        itemMap.get(pid).quantity += item.quantity;
+      } else {
+        const newItem = JSON.parse(JSON.stringify(item));
+        itemMap.set(pid, newItem);
+        mergedItems.push(newItem);
+      }
+    });
+
+    return NextResponse.json({ ...cart.toObject(), items: mergedItems });
   } catch (error: any) {
     console.error("Cart GET API error:", error.message, error.stack);
     return NextResponse.json(
@@ -35,42 +50,82 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const userId = session.user.id;
+  const MAX_RETRIES = 3;
+  let retries = 0;
+
   try {
-    const { productId, action } = await req.json(); // action = "add" | "remove" | "decrement"
+    const { productId, action, quantity: qtyDiff } = await req.json();
     await connectToDatabase();
 
-    let cart = await Cart.findOne({ userId: session.user.id });
+    while (retries < MAX_RETRIES) {
+      try {
+        let updatedCart;
+        const amount = qtyDiff !== undefined ? qtyDiff : (action === "add" ? 1 : action === "decrement" ? -1 : 0);
 
-    if (!cart) {
-      cart = new Cart({ userId: session.user.id, items: [] });
-    }
+        if (action === "add" || (qtyDiff !== undefined && qtyDiff > 0)) {
+          // 1. Try to increment existing item
+          updatedCart = await Cart.findOneAndUpdate(
+            { userId, "items.productId": productId },
+            { $inc: { "items.$.quantity": amount } },
+            { new: true }
+          );
 
-    const itemIndex = cart.items.findIndex((p: any) => p.productId.toString() === productId);
+          // 2. If not found, push new item
+          if (!updatedCart && amount > 0) {
+            updatedCart = await Cart.findOneAndUpdate(
+              { userId },
+              { $push: { items: { productId, quantity: amount } } },
+              { upsert: true, new: true }
+            );
+          }
+        } else if (action === "decrement" || (qtyDiff !== undefined && qtyDiff < 0)) {
+          // 1. Find the item to check quantity if decrementing via action
+          const cart = await Cart.findOne({ userId, "items.productId": productId });
+          const item = cart?.items.find((i: any) => i.productId.toString() === productId);
 
-    if (action === "add") {
-      if (itemIndex > -1) {
-        cart.items[itemIndex].quantity += 1;
-      } else {
-        cart.items.push({ productId, quantity: 1 });
-      }
-    } else if (action === "decrement") {
-      if (itemIndex > -1) {
-        if (cart.items[itemIndex].quantity > 1) {
-          cart.items[itemIndex].quantity -= 1;
-        } else {
-          cart.items.splice(itemIndex, 1);
+          if (item) {
+            const currentQty = item.quantity;
+            const newQty = currentQty + amount;
+
+            if (newQty > 0) {
+              updatedCart = await Cart.findOneAndUpdate(
+                { userId, "items.productId": productId },
+                { $inc: { "items.$.quantity": amount } },
+                { new: true }
+              );
+            } else {
+              // Remove item if quantity falls to 0 or below
+              updatedCart = await Cart.findOneAndUpdate(
+                { userId },
+                { $pull: { items: { productId } } },
+                { new: true }
+              );
+            }
+          }
+        } else if (action === "remove") {
+          updatedCart = await Cart.findOneAndUpdate(
+            { userId },
+            { $pull: { items: { productId } } },
+            { new: true }
+          );
         }
-      }
-    } else if (action === "remove") {
-      if (itemIndex > -1) {
-        cart.items.splice(itemIndex, 1);
+
+        return NextResponse.json({ message: "Cart updated", cart: updatedCart });
+      } catch (error: any) {
+        if (error.code === 112 || error.message.includes("WriteConflict")) {
+          retries++;
+          if (retries >= MAX_RETRIES) {
+            return NextResponse.json({ message: "Cart is busy, please try again" }, { status: 409 });
+          }
+          await new Promise((resolve) => setTimeout(resolve, 50 * retries));
+          continue;
+        }
+        throw error;
       }
     }
-
-    await cart.save();
-    return NextResponse.json({ message: "Cart updated", cart });
   } catch (error: any) {
     console.error("Cart POST API error:", error.message, error.stack);
-    return NextResponse.json({ message: "Error updating cart" }, { status: 500 });
+    return NextResponse.json({ message: "Error updating cart", error: error.message }, { status: 500 });
   }
 }

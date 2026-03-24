@@ -13,5 +13,7 @@ const CartSchema = new Schema(
   { timestamps: true }
 );
 
+CartSchema.index({ userId: 1, "items.productId": 1 }, { unique: false });
+
 const Cart = models.Cart || model("Cart", CartSchema);
 export default Cart;

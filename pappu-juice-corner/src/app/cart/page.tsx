@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -50,37 +50,66 @@ export default function CartPage() {
     return `Arrival: 10-15 mins`;
   };
 
-  const updateQuantity = async (productId: string, action: "add" | "decrement" | "remove") => {
-    try {
-      // Optimistic Update
-      const currentItems = cartData?.items || [];
-      const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
-      
-      if (itemIndex > -1) {
-        const newItems = [...currentItems];
-        if (action === "remove") {
-          newItems.splice(itemIndex, 1);
-        } else {
-          const newQty = action === "add" ? newItems[itemIndex].quantity + 1 : newItems[itemIndex].quantity - 1;
-          if (newQty <= 0) {
-            newItems.splice(itemIndex, 1);
-          } else {
-            newItems[itemIndex] = { ...newItems[itemIndex], quantity: newQty };
-          }
-        }
-        mutateCart({ ...cartData, items: newItems }, false);
-      }
+  // Debounce helper
+  const debounce = (fn: Function, ms: number) => {
+    let timeoutId: any;
+    return (...args: any[]) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => fn(...args), ms);
+    };
+  };
 
+  const performCartUpdate = async (productId: string, action: string) => {
+    try {
       const res = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, action }),
       });
-      if (!res.ok) throw new Error();
+
+      if (res.status === 409) {
+        // Write conflict - wait 100ms and retry once
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const retryRes = await fetch("/api/cart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId, action }),
+        });
+        if (!retryRes.ok) throw new Error();
+      } else if (!res.ok) {
+        throw new Error();
+      }
+      
       mutateCart();
     } catch {
       toast.error("Failed to update cart");
       mutateCart(); // Revert
+    }
+  };
+
+  const debouncedUpdate = useMemo(() => debounce(performCartUpdate, 300), [mutateCart]);
+
+  const updateQuantity = async (productId: string, action: "add" | "decrement" | "remove") => {
+    // Optimistic Update
+    const currentItems = cartData?.items || [];
+    const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
+    
+    if (itemIndex > -1) {
+      const newItems = [...currentItems];
+      if (action === "remove") {
+        newItems.splice(itemIndex, 1);
+        mutateCart({ ...cartData, items: newItems }, false);
+        performCartUpdate(productId, action); // Immediate for remove
+      } else {
+        const newQty = action === "add" ? newItems[itemIndex].quantity + 1 : newItems[itemIndex].quantity - 1;
+        if (newQty <= 0) {
+          newItems.splice(itemIndex, 1);
+        } else {
+          newItems[itemIndex] = { ...newItems[itemIndex], quantity: newQty };
+        }
+        mutateCart({ ...cartData, items: newItems }, false);
+        debouncedUpdate(productId, action); // Debounced for quantity
+      }
     }
   };
 
