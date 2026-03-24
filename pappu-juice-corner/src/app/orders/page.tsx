@@ -25,10 +25,11 @@ export default function OrdersPage() {
     revalidateOnFocus: false
   });
   
-  // Shop Status Logic
+  // Shop Status Logic (IST Fix)
   const shopSettings = settings?.shop || { isManualClose: false, openingTime: "09:00", closingTime: "21:00" };
   const now = new Date();
-  const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  const currentTime = istTime.getUTCHours().toString().padStart(2, '0') + ":" + istTime.getUTCMinutes().toString().padStart(2, '0');
   const isInsideHours = currentTime >= shopSettings.openingTime && currentTime <= shopSettings.closingTime;
   const isShopOpen = !shopSettings.isManualClose && isInsideHours;
 

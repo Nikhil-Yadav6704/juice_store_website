@@ -117,11 +117,12 @@ export default function AdminOrdersPage() {
     toast.success("Orders CSV downloaded.");
   };
 
-  // Shop Status Logic
+  // Shop Status Logic (IST Fix)
   const shopSettings = settings?.shop || { isManualClose: false, openingTime: "09:00", closingTime: "21:00" };
   const now = new Date();
-  const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-  const isInsideHours = currentTime >= shopSettings.openingTime && currentTime <= shopSettings.closingTime;
+  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  const currentTime = istTime.getUTCHours().toString().padStart(2, '0') + ":" + istTime.getUTCMinutes().toString().padStart(2, '0');
+  const isInsideHours = currentTime >= (shopSettings.openingTime || "09:00") && currentTime <= (shopSettings.closingTime || "21:00");
   const isShopOpen = !shopSettings.isManualClose && isInsideHours;
 
   return (
@@ -210,7 +211,7 @@ export default function AdminOrdersPage() {
         </div>
         <div className="flex items-center gap-2 text-primary font-bold text-sm bg-primary-fixed/20 px-4 py-2.5 rounded-xl">
           <span className="material-symbols-outlined text-[18px]">calendar_today</span>
-          Today, Oct 24
+          Today, {new Date(new Date().getTime() + (5.5 * 60 * 60 * 1000)).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
         </div>
       </div>
 

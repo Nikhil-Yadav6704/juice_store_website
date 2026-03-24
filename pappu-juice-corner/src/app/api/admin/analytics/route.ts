@@ -122,7 +122,7 @@ export async function GET() {
     let morningOrders = 0;
     let totalTracked = 0;
     allOrders.forEach(o => {
-      const h = new Date(o.createdAt).getHours();
+      const h = new Date(new Date(o.createdAt).getTime() + (5.5 * 60 * 60 * 1000)).getUTCHours();
       totalTracked++;
       if (h >= 6 && h < 12) morningOrders++;
     });
