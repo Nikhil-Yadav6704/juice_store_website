@@ -181,7 +181,7 @@ export default function AdminDashboard() {
               const isLast = idx === history.length - 1;
               
               return (
-                <div key={idx} className="flex-grow flex flex-col items-center gap-2 h-full">
+                <div key={idx} className="flex-grow flex flex-col justify-end items-center gap-2 h-full">
                   <div 
                     className={`w-full transition-all duration-500 ${
                       item.revenue > 0 

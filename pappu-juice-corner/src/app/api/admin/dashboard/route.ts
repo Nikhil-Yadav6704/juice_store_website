@@ -139,7 +139,6 @@ export async function GET() {
     const bestProductAggregation = await Order.aggregate([
       {
         $match: {
-          status: { $ne: "Cancelled" },
           createdAt: { $gte: startOfMonth }
         }
       },
