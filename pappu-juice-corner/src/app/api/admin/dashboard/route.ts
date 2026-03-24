@@ -24,7 +24,14 @@ export async function GET() {
     let isShopOpen = true;
     if (settings?.shop) {
       const { isManualClose, openingTime, closingTime } = settings.shop;
-      const currentTimeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+      
+      // Get current time in Indian Standard Time (IST)
+      const currentTimeStr = now.toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false,
+        timeZone: 'Asia/Kolkata' 
+      });
       
       const isOpenTime = currentTimeStr >= (openingTime || "09:00") && currentTimeStr <= (closingTime || "21:00");
       isShopOpen = !isManualClose && isOpenTime;
