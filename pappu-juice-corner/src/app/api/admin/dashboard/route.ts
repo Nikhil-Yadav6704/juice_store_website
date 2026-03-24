@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
 import Order from "@/models/Order";
-import Product from "@/models/Product";
+import Settings from "@/models/Settings";
 
 export async function GET() {
   try {
@@ -15,25 +15,100 @@ export async function GET() {
     await connectToDatabase();
 
     const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
     const startOfHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
 
-    // Fetch Today's Pulse and Monthly Aggregates in parallel
+    // Fetch Settings for Shop Status
+    const settings = await Settings.findOne({});
+    let isShopOpen = true;
+    if (settings?.shop) {
+      const { isManualClose, openingTime, closingTime } = settings.shop;
+      const currentTimeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+      
+      const isOpenTime = currentTimeStr >= (openingTime || "09:00") && currentTimeStr <= (closingTime || "21:00");
+      isShopOpen = !isManualClose && isOpenTime;
+    }
+
+    // Aggregation 1: Monthly History (Last 12 Months)
+    const monthlyHistory = await Order.aggregate([
+      {
+        $match: {
+          status: { $ne: "Cancelled" },
+          createdAt: { $gte: new Date(now.getFullYear(), now.getMonth() - 11, 1) }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" }
+          },
+          revenue: { $sum: "$grandTotal" }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    // Fill gaps for Monthly History
+    const monthlyData = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const year = d.getFullYear();
+      const month = d.getMonth() + 1;
+      const match = monthlyHistory.find(h => h._id.year === year && h._id.month === month);
+      monthlyData.push({
+        label: d.toLocaleString('default', { month: 'short' }),
+        revenue: match ? match.revenue : 0
+      });
+    }
+
+    // Aggregation 2: Weekly History (Last 7 Days)
+    const sevenDaysAgo = new Date(startOfToday);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+
+    const weeklyHistory = await Order.aggregate([
+      {
+        $match: {
+          status: { $ne: "Cancelled" },
+          createdAt: { $gte: sevenDaysAgo }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          revenue: { $sum: "$grandTotal" }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
+    // Fill gaps for Weekly History
+    const weeklyData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(startOfToday);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const match = weeklyHistory.find(h => h._id === dateStr);
+      weeklyData.push({
+        label: d.toLocaleString('default', { weekday: 'short' }),
+        revenue: match ? match.revenue : 0
+      });
+    }
+
+    // Aggregation 3: Current Month Stats & Top Products
     const [todaysOrders, monthlyOrdersRaw] = await Promise.all([
-      Order.find({ createdAt: { $gte: startOfDay } }).select("grandTotal items createdAt"),
-      Order.find({ createdAt: { $gte: startOfMonth } }).select("grandTotal items createdAt")
+      Order.find({ createdAt: { $gte: startOfToday } }),
+      Order.find({ createdAt: { $gte: startOfMonth }, status: { $ne: "Cancelled" } })
     ]);
 
     const dailyRevenue = todaysOrders.reduce((acc, current) => acc + current.grandTotal, 0);
     const dailyOrderCount = todaysOrders.length;
+    const currentHourOrders = todaysOrders.filter(o => new Date(o.createdAt) >= startOfHour).length;
 
     const monthlyRevenue = monthlyOrdersRaw.reduce((acc, curr) => acc + curr.grandTotal, 0);
     const monthlyOrdersCount = monthlyOrdersRaw.length;
     const avgOrderValue = monthlyOrdersCount > 0 ? Math.round(monthlyRevenue / monthlyOrdersCount) : 0;
-
-    // Current Hour
-    const currentHourOrders = todaysOrders.filter(o => new Date(o.createdAt) >= startOfHour).length;
 
     // Total Juices Today & Product Sales mapping
     let totalJuicesToday = 0;
@@ -41,16 +116,14 @@ export async function GET() {
 
     monthlyOrdersRaw.forEach(order => {
       order.items.forEach((item: any) => {
-        // Aggregate monthly stats for Top Products
         if (!productSells[item.name]) {
-           productSells[item.name] = { units: 0, revenue: 0 };
+          productSells[item.name] = { units: 0, revenue: 0 };
         }
         productSells[item.name].units += item.quantity;
         productSells[item.name].revenue += item.lineTotal;
 
-        // Aggregate today's juicing counts
-        if (new Date(order.createdAt) >= startOfDay) {
-           totalJuicesToday += item.quantity;
+        if (new Date(order.createdAt) >= startOfToday) {
+          totalJuicesToday += item.quantity;
         }
       });
     });
@@ -80,7 +153,12 @@ export async function GET() {
         kitchenCapacity: "88%",
         monthlyRevenue,
         monthlyOrdersCount,
-        avgOrderValue
+        avgOrderValue,
+        isShopOpen
+      },
+      revenueHistory: {
+        Monthly: monthlyData,
+        Weekly: weeklyData
       },
       topProducts: sortedProducts.length > 0 ? sortedProducts : [
         { name: "No Data Yet", units: 0, revenue: 0, status: "-", trend: "stable" }

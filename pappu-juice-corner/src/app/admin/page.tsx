@@ -128,7 +128,13 @@ export default function AdminDashboard() {
           <div>
             <p className="text-xs font-bold text-[#8f4e00] uppercase tracking-widest mb-1">Next Cold-Press Batch</p>
             <p className="text-[2.5rem] md:text-[4rem] leading-none font-black text-[#8f4e00] font-headline tracking-tighter">
-              {liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} /> : "14:22"}
+              {dashboardData?.stats?.isShopOpen ? (
+                liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} /> : "00:00"
+              ) : (
+                <span className="flex items-center gap-2">
+                  00:00 <span className="text-xs bg-[#8f4e00] text-white px-2 py-0.5 rounded">CLOSED</span>
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -158,7 +164,7 @@ export default function AdminDashboard() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h3 className="text-2xl font-bold font-headline text-on-surface">Monthly Growth</h3>
-              <p className="text-sm text-on-surface-variant mt-1">Revenue performance across the last 30 days.</p>
+              <p className="text-sm text-on-surface-variant mt-1">Revenue performance across the last {growthView === 'Monthly' ? '12 Months' : '7 Days'}.</p>
             </div>
             <div className="bg-surface-container-lowest flex rounded-full p-1 shadow-sm">
               <button onClick={() => setGrowthView('Monthly')} className={`px-5 py-1.5 text-sm font-bold rounded-full transition-colors cursor-pointer ${growthView === 'Monthly' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:text-on-surface'}`}>Monthly</button>
@@ -166,14 +172,23 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="h-48 flex items-end justify-between gap-4 mb-8">
-            <div className="w-full bg-[#dbe4d5] rounded-t-xl h-[40%]"></div>
-            <div className="w-full bg-[#dbe4d5] rounded-t-xl h-[60%]"></div>
-            <div className="w-full bg-[#dbe4d5] rounded-t-xl h-[45%]"></div>
-            <div className="w-full bg-[#dbe4d5] rounded-t-xl h-[70%]"></div>
-            <div className="w-full bg-[#dbe4d5] rounded-t-xl h-[55%]"></div>
-            <div className="w-full bg-[#dbe4d5] rounded-t-xl h-[85%]"></div>
-            <div className="w-full bg-tertiary rounded-t-xl h-[100%]"></div>
+          <div className="h-48 flex items-end justify-between gap-2 md:gap-4 mb-8 text-center">
+            {dashboardData?.revenueHistory?.[growthView]?.map((item: any, idx: number) => {
+              const history = dashboardData.revenueHistory[growthView];
+              const maxRev = Math.max(...history.map((h: any) => h.revenue), 1);
+              const height = (item.revenue / maxRev) * 100;
+              const isLast = idx === history.length - 1;
+              
+              return (
+                <div key={idx} className="flex-grow flex flex-col items-center gap-2 h-full">
+                  <div 
+                    className={`w-full rounded-t-lg md:rounded-t-xl transition-all duration-500 ${isLast ? 'bg-tertiary' : 'bg-[#dbe4d5]'}`}
+                    style={{ height: `${Math.max(height, 5)}%` }}
+                    title={`₹${item.revenue}`}
+                  ></div>
+                </div>
+              );
+            })}
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-4 md:pt-6 border-t border-outline-variant/30">
