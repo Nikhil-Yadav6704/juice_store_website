@@ -13,8 +13,9 @@ export default function FloatingCart() {
     session?.user ? "/api/cart" : null,
     fetcher,
     { 
-      dedupingInterval: 10000,
-      revalidateOnFocus: false,
+      dedupingInterval: 0,
+      revalidateOnFocus: true,
+      revalidateOnMount: true,
       shouldRetryOnError: false
     }
   );

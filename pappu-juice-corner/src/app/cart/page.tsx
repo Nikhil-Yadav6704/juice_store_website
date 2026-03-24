@@ -54,7 +54,7 @@ export default function CartPage() {
     try {
       // Optimistic Update
       const currentItems = cartData?.items || [];
-      const itemIndex = currentItems.findIndex((i: any) => (i.productId._id || i.productId) === productId);
+      const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
       
       if (itemIndex > -1) {
         const newItems = [...currentItems];

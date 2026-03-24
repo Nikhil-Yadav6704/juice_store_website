@@ -15,11 +15,12 @@ export default function MenuPage() {
     revalidateOnFocus: false,
   });
   const { data: cartData, mutate: mutateCart } = useSWR(
-    session?.user ? `/api/cart/${session.user.id}` : null,
+    session?.user ? "/api/cart" : null,
     fetcher,
     { 
-      dedupingInterval: 10000,
-      revalidateOnFocus: false 
+      dedupingInterval: 0,
+      revalidateOnFocus: true,
+      revalidateOnMount: true
     }
   );
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -48,7 +49,7 @@ export default function MenuPage() {
       // Optimistic Update
       const product = (products || []).find((p: any) => p._id === productId);
       const currentItems = cartData?.items || [];
-      const itemIndex = currentItems.findIndex((i: any) => (i.productId?._id || i.productId) === productId);
+      const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
       
       let newItems;
       if (itemIndex > -1) {
@@ -81,7 +82,7 @@ export default function MenuPage() {
     try {
       // Optimistic Update
       const currentItems = cartData?.items || [];
-      const itemIndex = currentItems.findIndex((i: any) => (i.productId._id || i.productId) === productId);
+      const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
       
       if (itemIndex > -1) {
         const newItems = [...currentItems];
@@ -111,7 +112,9 @@ export default function MenuPage() {
 
   const getCartQuantity = (productId: string) => {
     if (!cartData || !cartData.items) return 0;
-    const item = cartData.items.find((i: any) => i.productId._id === productId || i.productId === productId);
+    const item = cartData.items.find((i: any) => 
+      String(i.productId?._id || i.productId) === String(productId)
+    );
     return item ? item.quantity : 0;
   };
 
