@@ -128,6 +128,27 @@ export async function GET() {
       });
     });
 
+    // Aggregation 3: Best Product for the current month
+    const bestProductAggregation = await Order.aggregate([
+      {
+        $match: {
+          status: { $ne: "Cancelled" },
+          createdAt: { $gte: startOfMonth }
+        }
+      },
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.name",
+          totalQuantity: { $sum: "$items.quantity" }
+        }
+      },
+      { $sort: { totalQuantity: -1 } },
+      { $limit: 1 }
+    ]);
+
+    const topProductName = bestProductAggregation.length > 0 ? bestProductAggregation[0]._id : "No data";
+
     const sortedProducts = Object.entries(productSells)
       .sort((a, b) => b[1].units - a[1].units)
       .slice(0, 5)
@@ -138,8 +159,6 @@ export async function GET() {
         status: "In Stock",
         trend: "up"
       }));
-
-    const topProductName = sortedProducts.length > 0 ? sortedProducts[0].name : "-";
 
     return NextResponse.json({
       pulse: {

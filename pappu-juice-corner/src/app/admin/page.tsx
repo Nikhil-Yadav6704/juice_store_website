@@ -127,15 +127,15 @@ export default function AdminDashboard() {
           </div>
           <div>
             <p className="text-xs font-bold text-[#8f4e00] uppercase tracking-widest mb-1">Next Cold-Press Batch</p>
-            <p className="text-[2.5rem] md:text-[4rem] leading-none font-black text-[#8f4e00] font-headline tracking-tighter">
+            <div className="text-[2.5rem] md:text-[4rem] leading-none font-black text-[#8f4e00] font-headline tracking-tighter flex items-center gap-2 md:gap-4 mt-1">
               {dashboardData?.stats?.isShopOpen ? (
                 liveData?.nextBatchEnd ? <CountdownTimer targetDate={liveData.nextBatchEnd} /> : "00:00"
               ) : (
-                <span className="flex items-center gap-2">
-                  00:00 <span className="text-xs bg-[#8f4e00] text-white px-2 py-0.5 rounded">CLOSED</span>
-                </span>
+                <>
+                  00:00 <span className="text-[10px] md:text-sm bg-[#8f4e00] text-white px-2 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl font-bold tracking-widest uppercase">CLOSED</span>
+                </>
               )}
-            </p>
+            </div>
           </div>
         </div>
 
@@ -172,20 +172,26 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="h-48 flex items-end justify-between gap-2 md:gap-4 mb-8 text-center">
+          <div className="h-44 flex items-end justify-between gap-2 md:gap-4 mb-4 text-center">
             {dashboardData?.revenueHistory?.[growthView]?.map((item: any, idx: number) => {
               const history = dashboardData.revenueHistory[growthView];
               const maxRev = Math.max(...history.map((h: any) => h.revenue), 1);
-              const height = (item.revenue / maxRev) * 100;
+              // Scale to 80% if data exists, otherwise show a tiny placeholder
+              const height = item.revenue > 0 ? (item.revenue / maxRev) * 80 : 2; 
               const isLast = idx === history.length - 1;
               
               return (
                 <div key={idx} className="flex-grow flex flex-col items-center gap-2 h-full">
                   <div 
-                    className={`w-full rounded-t-lg md:rounded-t-xl transition-all duration-500 ${isLast ? 'bg-tertiary' : 'bg-[#dbe4d5]'}`}
-                    style={{ height: `${Math.max(height, 5)}%` }}
-                    title={`₹${item.revenue}`}
+                    className={`w-full transition-all duration-500 ${
+                      item.revenue > 0 
+                        ? (isLast ? 'bg-tertiary rounded-t-lg md:rounded-t-xl' : 'bg-[#dbe4d5] rounded-t-lg md:rounded-t-xl') 
+                        : 'bg-outline-variant/10 border border-dashed border-outline-variant/20 h-1 rounded-sm'
+                    }`}
+                    style={{ height: item.revenue > 0 ? `${height}%` : undefined }}
+                    title={item.revenue > 0 ? `₹${item.revenue}` : 'No revenue'}
                   ></div>
+                  <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter sm:tracking-normal">{item.label}</span>
                 </div>
               );
             })}
