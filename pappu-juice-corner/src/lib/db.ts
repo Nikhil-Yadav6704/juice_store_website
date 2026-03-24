@@ -51,6 +51,14 @@ async function connectToDatabase() {
 
   try {
     cached.conn = await cached.promise;
+    
+    // Register all models here so they are always available
+    // regardless of which API route triggered the connection
+    await Promise.all([
+      import('@/models/User'),
+      import('@/models/Product'),
+      import('@/models/Order'),
+    ]);
   } catch (e) {
     cached.promise = null;
     throw e;
