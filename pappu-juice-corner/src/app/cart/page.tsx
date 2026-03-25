@@ -36,8 +36,9 @@ export default function CartPage() {
   
   const [deliveryType, setDeliveryType] = useState("hourly");
   const [placingOrder, setPlacingOrder] = useState(false);
-  
-  // Arrival estimate logic moved here for clarity
+  const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
+
+  // Arrival estimate logic
   const getDynamicSlot = () => {
     if (!liveData?.nextBatchEnd) return "Calculating...";
     const batchDate = new Date(liveData.nextBatchEnd);
@@ -50,16 +51,12 @@ export default function CartPage() {
     return `Arrival: 10-15 mins`;
   };
 
-  // Debounce helper
-  const debounce = (fn: Function, ms: number) => {
-    let timeoutId: any;
-    return (...args: any[]) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => fn(...args), ms);
-    };
-  };
+  const SmallSpinner = () => (
+    <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+  );
 
   const performCartUpdate = async (productId: string, action: string) => {
+    setLoadingProductId(productId);
     try {
       const res = await fetch("/api/cart", {
         method: "POST",
@@ -80,36 +77,18 @@ export default function CartPage() {
         throw new Error();
       }
       
-      mutateCart();
+      await mutateCart();
     } catch {
       toast.error("Failed to update cart");
-      mutateCart(); // Revert
+    } finally {
+      setLoadingProductId(null);
     }
   };
 
-  const debouncedUpdate = useMemo(() => debounce(performCartUpdate, 300), [mutateCart]);
-
   const updateQuantity = async (productId: string, action: "add" | "decrement" | "remove") => {
-    // Optimistic Update
-    const currentItems = cartData?.items || [];
-    const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
-    
-    if (itemIndex > -1) {
-      const newItems = [...currentItems];
-      if (action === "remove") {
-        newItems.splice(itemIndex, 1);
-        mutateCart({ ...cartData, items: newItems }, false);
-        performCartUpdate(productId, action); // Immediate for remove
-      } else {
-        const newQty = action === "add" ? newItems[itemIndex].quantity + 1 : newItems[itemIndex].quantity - 1;
-        if (newQty <= 0) {
-          newItems.splice(itemIndex, 1);
-        } else {
-          newItems[itemIndex] = { ...newItems[itemIndex], quantity: newQty };
-        }
-        mutateCart({ ...cartData, items: newItems }, false);
-        debouncedUpdate(productId, action); // Debounced for quantity
-      }
+    await performCartUpdate(productId, action);
+    if (action === "remove") {
+      toast.success("Removed from cart");
     }
   };
 
@@ -252,11 +231,21 @@ export default function CartPage() {
                       <div className="flex items-center justify-between sm:justify-end w-full sm:w-1/2 gap-4 md:gap-6">
                          
                          <div className="flex items-center gap-3 md:gap-4 bg-[#f2f5ee] rounded-full px-2 py-1.5 shadow-inner">
-                           <button onClick={() => updateQuantity(item.productId._id, "decrement")} className="w-7 h-7 flex items-center justify-center rounded-full bg-white text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors cursor-pointer">
+                           <button 
+                             onClick={() => updateQuantity(item.productId._id, "decrement")} 
+                             disabled={loadingProductId === item.productId._id}
+                             className="w-7 h-7 flex items-center justify-center rounded-full bg-white text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                           >
                              <span className="material-symbols-outlined text-[14px]">remove</span>
                            </button>
-                           <span className="font-bold text-[13px] w-3 text-center">{item.quantity}</span>
-                           <button onClick={() => updateQuantity(item.productId._id, "add")} className="w-7 h-7 flex items-center justify-center rounded-full bg-white text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors cursor-pointer">
+                           <span className="font-bold text-[13px] w-3 flex justify-center">
+                             {loadingProductId === item.productId._id ? <SmallSpinner /> : item.quantity}
+                           </span>
+                           <button 
+                             onClick={() => updateQuantity(item.productId._id, "add")} 
+                             disabled={loadingProductId === item.productId._id}
+                             className="w-7 h-7 flex items-center justify-center rounded-full bg-white text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                           >
                              <span className="material-symbols-outlined text-[14px]">add</span>
                            </button>
                          </div>
@@ -265,9 +254,19 @@ export default function CartPage() {
                            ₹{Number(item.productId.price).toFixed(2)}
                          </p>
 
-                         <button onClick={() => updateQuantity(item.productId._id, "remove")} className="flex items-center gap-1 text-[#ba1a1a] hover:text-[#93000a] text-[10px] uppercase font-bold tracking-widest transition-colors pl-2 cursor-pointer">
-                           <span className="material-symbols-outlined text-[14px]">delete</span>
-                           <span className="hidden sm:inline">Remove</span>
+                         <button 
+                           onClick={() => updateQuantity(item.productId._id, "remove")} 
+                           disabled={loadingProductId === item.productId._id}
+                           className="flex items-center gap-1 text-[#ba1a1a] hover:text-[#93000a] text-[10px] uppercase font-bold tracking-widest transition-colors pl-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                         >
+                           {loadingProductId === item.productId._id ? (
+                             <SmallSpinner />
+                           ) : (
+                             <>
+                               <span className="material-symbols-outlined text-[14px]">delete</span>
+                               <span className="hidden sm:inline">Remove</span>
+                             </>
+                           )}
                          </button>
                       </div>
                     </div>
@@ -304,10 +303,15 @@ export default function CartPage() {
                           <p className="text-primary font-bold text-[11px] md:text-xs mb-3 md:mb-4">+₹{Number(product.price).toFixed(0)}</p>
                           <button 
                             onClick={() => updateQuantity(product._id, "add")} 
-                            className="w-full py-2 bg-[#f2f5ee] hover:bg-[#e4ebdd] text-[#1b4321] text-[11px] md:text-xs font-bold rounded-full transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                            disabled={loadingProductId === product._id}
+                            className="w-full py-2 bg-[#f2f5ee] hover:bg-[#e4ebdd] text-[#1b4321] text-[11px] md:text-xs font-bold rounded-full transition-colors flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
                           >
-                            <span className="material-symbols-outlined text-[14px]">add_shopping_cart</span>
-                            Add
+                            {loadingProductId === product._id ? <SmallSpinner /> : (
+                              <>
+                                <span className="material-symbols-outlined text-[14px]">add_shopping_cart</span>
+                                Add
+                              </>
+                            )}
                           </button>
                         </div>
                     ))}

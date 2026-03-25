@@ -34,6 +34,7 @@ export default function OrdersPage() {
   const isShopOpen = !shopSettings.isManualClose && isInsideHours;
 
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const [loadingOrderId, setLoadingOrderId] = useState<string | null>(null);
 
   const activeOrders = orders?.filter((o: any) => !['Delivered', 'Cancelled'].includes(o.status)) || [];
   const pastOrders = orders?.filter((o: any) => ['Delivered', 'Cancelled'].includes(o.status)) || [];
@@ -237,21 +238,35 @@ export default function OrdersPage() {
 
                           <div className="flex items-center gap-4 md:gap-6 sm:justify-end pl-14 sm:pl-0">
                              <span className="font-bold text-base md:text-lg text-on-surface">₹{Number(order?.grandTotal || 0).toFixed(2)}</span>
-                             <button onClick={async () => {
-                               try {
-                                 for (const item of order.items) {
-                                   await fetch('/api/cart', {
-                                     method: 'POST',
-                                     headers: { 'Content-Type': 'application/json' },
-                                     body: JSON.stringify({ productId: item.productId, quantity: item.quantity })
-                                   });
+                             <button 
+                               disabled={loadingOrderId === order._id}
+                               onClick={async () => {
+                                 setLoadingOrderId(order._id);
+                                 try {
+                                   for (const item of order.items) {
+                                     await fetch('/api/cart', {
+                                       method: 'POST',
+                                       headers: { 'Content-Type': 'application/json' },
+                                       body: JSON.stringify({ productId: item.productId, quantity: item.quantity })
+                                     });
+                                   }
+                                   toast.success('Items added to your cart!');
+                                 } catch {
+                                   toast.error('Failed to reorder. Please try again.');
+                                 } finally {
+                                   setLoadingOrderId(null);
                                  }
-                                 toast.success('Items added to your cart!');
-                               } catch {
-                                 toast.error('Failed to reorder. Please try again.');
-                               }
-                             }} className="bg-white text-on-surface px-5 md:px-6 py-2 md:py-2.5 rounded-full text-[12px] font-bold shadow-sm hover:shadow transition-shadow border border-[#dce4d5] cursor-pointer">
-                               Reorder
+                               }} 
+                               className="bg-white text-on-surface px-5 md:px-6 py-2 md:py-2.5 rounded-full text-[12px] font-bold shadow-sm hover:shadow transition-shadow border border-[#dce4d5] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                             >
+                               {loadingOrderId === order._id ? (
+                                 <>
+                                   <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                                   Adding...
+                                 </>
+                               ) : (
+                                 "Reorder"
+                               )}
                              </button>
                           </div>
                         </div>

@@ -24,17 +24,14 @@ export default function MenuPage() {
     }
   );
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
 
-  // Debounce helper
-  const debounce = (fn: Function, ms: number) => {
-    let timeoutId: any;
-    return (...args: any[]) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => fn(...args), ms);
-    };
-  };
+  const SmallSpinner = () => (
+    <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+  );
 
   const performCartUpdate = async (productId: string, action: string) => {
+    setLoadingProductId(productId);
     try {
       const res = await fetch("/api/cart", {
         method: "POST",
@@ -55,14 +52,13 @@ export default function MenuPage() {
         throw new Error();
       }
       
-      mutateCart();
+      await mutateCart();
     } catch {
       toast.error("Failed to update cart");
-      mutateCart(); // Revert
+    } finally {
+      setLoadingProductId(null);
     }
   };
-
-  const debouncedUpdate = useMemo(() => debounce(performCartUpdate, 300), [mutateCart]);
 
   const handleAddToCart = async (productId: string) => {
     if (!session) {
@@ -84,41 +80,12 @@ export default function MenuPage() {
       return;
     }
 
-    // Optimistic Update
-    const product = (products || []).find((p: any) => p._id === productId);
-    const currentItems = cartData?.items || [];
-    const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
-    
-    let newItems;
-    if (itemIndex > -1) {
-      newItems = [...currentItems];
-      newItems[itemIndex] = { ...newItems[itemIndex], quantity: (newItems[itemIndex].quantity || 0) + 1 };
-    } else {
-      newItems = [...currentItems, { productId: product, quantity: 1 }];
-    }
-    
-    mutateCart({ ...cartData, items: newItems }, false);
-    debouncedUpdate(productId, "add");
+    await performCartUpdate(productId, "add");
+    toast.success("Added to cart!");
   };
 
   const updateCartQuantity = async (productId: string, action: "add" | "decrement") => {
-    // Optimistic Update
-    const currentItems = cartData?.items || [];
-    const itemIndex = currentItems.findIndex((i: any) => String(i.productId?._id || i.productId) === String(productId));
-    
-    if (itemIndex > -1) {
-      const newItems = [...currentItems];
-      const newQty = action === "add" ? newItems[itemIndex].quantity + 1 : newItems[itemIndex].quantity - 1;
-      
-      if (newQty <= 0) {
-        newItems.splice(itemIndex, 1);
-      } else {
-        newItems[itemIndex] = { ...newItems[itemIndex], quantity: newQty };
-      }
-      
-      mutateCart({ ...cartData, items: newItems }, false);
-      debouncedUpdate(productId, action);
-    }
+    await performCartUpdate(productId, action);
   };
 
   const getCartQuantity = (productId: string) => {
@@ -253,13 +220,35 @@ export default function MenuPage() {
                           
                           {qty > 0 ? (
                              <div className="flex items-center gap-2 md:gap-3 bg-surface-container rounded-full p-1 shadow-inner">
-                              <button onClick={() => updateCartQuantity(product._id, "decrement")} className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors cursor-pointer"><span className="material-symbols-outlined text-[16px]">remove</span></button>
-                              <span className="font-bold text-sm w-4 text-center">{qty}</span>
-                              <button onClick={() => updateCartQuantity(product._id, "add")} className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-sm hover:bg-[#0a4d15] transition-colors cursor-pointer"><span className="material-symbols-outlined text-[16px]">add</span></button>
+                              <button 
+                                onClick={() => updateCartQuantity(product._id, "decrement")} 
+                                disabled={loadingProductId === product._id}
+                                className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-on-surface shadow-sm hover:bg-surface-container-lowest transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">remove</span>
+                              </button>
+                              <span className="font-bold text-sm w-4 flex justify-center">
+                                {loadingProductId === product._id ? <SmallSpinner /> : qty}
+                              </span>
+                              <button 
+                                onClick={() => updateCartQuantity(product._id, "add")} 
+                                disabled={loadingProductId === product._id}
+                                className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-sm hover:bg-[#0a4d15] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">add</span>
+                              </button>
                             </div>
                           ) : (
-                            <button onClick={() => handleAddToCart(product._id)} className="w-10 h-10 rounded-full bg-[#1b4321] text-white flex items-center justify-center shadow-md hover:bg-primary transition-colors cursor-pointer">
-                              <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
+                            <button 
+                              onClick={() => handleAddToCart(product._id)} 
+                              disabled={loadingProductId === product._id}
+                              className="w-10 h-10 rounded-full bg-[#1b4321] text-white flex items-center justify-center shadow-md hover:bg-primary transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {loadingProductId === product._id ? (
+                                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                              ) : (
+                                <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
+                              )}
                             </button>
                           )}
                         </div>
