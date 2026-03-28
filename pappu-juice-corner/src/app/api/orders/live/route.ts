@@ -5,20 +5,24 @@ import Order from "@/models/Order";
 export async function GET() {
   await connectToDatabase();
 
-  // Get current hour start and end in IST (UTC+5:30)
+  // BUG 3: Calculate next batch end in IST (next hour boundary)
   const now = new Date();
-  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
-  
-  // End of current IST Hour
-  const endOfHourIST = new Date(istTime);
-  endOfHourIST.setUTCMinutes(59, 59, 999);
-  
-  // Convert back to UTC for output
-  const endOfHourUTC = new Date(endOfHourIST.getTime() - (5.5 * 60 * 60 * 1000));
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const istTime = new Date(now.getTime() + istOffset);
 
-  // Sum all juices in orders that are not yet delivered or cancelled
+  const nextBatchEndIST = new Date(istTime);
+  nextBatchEndIST.setUTCMinutes(59, 59, 999);
+  const nextBatchEnd = new Date(nextBatchEndIST.getTime() - istOffset);
+
+  // BUG 2: Get start of current clock hour in IST for filtering historical orders
+  const startOfCurrentHourIST = new Date(istTime);
+  startOfCurrentHourIST.setUTCMinutes(0, 0, 0);
+  const startOfHourUTC = new Date(startOfCurrentHourIST.getTime() - istOffset);
+
+  // BUG 1 & 2: Query for current hour active orders with corrected status
   const activeOrders = await Order.find({
-    status: { $in: ["Pending", "Preparing", "Shipped"] },
+    status: { $in: ["Pending", "Preparing", "Out for Delivery"] },
+    createdAt: { $gte: startOfHourUTC }
   });
 
   const count = activeOrders.reduce((total, order) => {
@@ -27,7 +31,7 @@ export async function GET() {
 
   return NextResponse.json({
     count,
-    nextBatchEnd: endOfHourUTC.toISOString(),
+    nextBatchEnd: nextBatchEnd.toISOString(),
     currentTime: now.toISOString(),
   });
 }
