@@ -94,7 +94,9 @@ export async function POST(req: Request) {
     if (deliveryType === "instant") deliveryFee = settings?.delivery?.instantPrice || 5.50;
     if (deliveryType === "super_instant") deliveryFee = settings?.delivery?.superInstantPrice || 9.00;
 
-    const grandTotal = subtotal + deliveryFee;
+    const taxRate = settings?.delivery?.taxRate || 0;
+    const taxAmount = Math.round(subtotal * (taxRate / 100));
+    const grandTotal = subtotal + deliveryFee + taxAmount;
 
     // Create Order with unique ID check (Fix for Problem 1)
     let orderId = "";
@@ -120,13 +122,20 @@ export async function POST(req: Request) {
       items: orderItems,
       deliveryType,
       deliveryFee,
+      taxRate,
+      taxAmount,
       grandTotal,
       paymentMethod: "COD",
       status: "Pending",
     });
 
-    // Increment user's juice count for rewards
-    await User.findByIdAndUpdate(session.user.id, { $inc: { juicesCount: totalJuices } });
+    // Increment user's juice count and order count
+    await User.findByIdAndUpdate(session.user.id, { 
+      $inc: { 
+        juicesCount: totalJuices,
+        ordersCount: 1 
+      } 
+    });
 
     // Clear Cart reliably (Fix for Problem 1)
     await Cart.findOneAndUpdate({ userId: session.user.id }, { $set: { items: [] } });

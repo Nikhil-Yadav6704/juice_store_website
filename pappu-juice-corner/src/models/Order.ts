@@ -20,6 +20,8 @@ const OrderSchema = new Schema(
       required: true,
     },
     deliveryFee: { type: Number, required: true },
+    taxRate: { type: Number, default: 0 },
+    taxAmount: { type: Number, default: 0 },
     grandTotal: { type: Number, required: true },
     paymentMethod: { type: String, default: "COD" },
     status: {

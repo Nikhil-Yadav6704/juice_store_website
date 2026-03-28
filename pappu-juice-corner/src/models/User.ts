@@ -10,6 +10,7 @@ const UserSchema = new Schema(
     role: { type: String, enum: ["user", "admin"], default: "user" },
     status: { type: String, enum: ["active", "blocked"], default: "active", index: true },
     juicesCount: { type: Number, default: 0 },
+    ordersCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

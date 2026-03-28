@@ -132,7 +132,7 @@ export default function OrdersPage() {
                           
                           <div className="sm:text-right">
                              <div className="font-black text-xl md:text-2xl font-headline text-[#1b4321] mb-1">
-                               ₹{Number(order?.grandTotal || 0).toFixed(2)}
+                                ₹{Number(order?.grandTotal || 0).toFixed(2)}
                              </div>
                              <div className="text-[11px] md:text-[12px] text-[#5c6359] font-medium">
                                {order.deliveryType === 'hourly' ? 'Free Delivery' : 'Paid Delivery (₹)'}
@@ -243,13 +243,17 @@ export default function OrdersPage() {
                                onClick={async () => {
                                  setLoadingOrderId(order._id);
                                  try {
-                                   for (const item of order.items) {
-                                     await fetch('/api/cart', {
-                                       method: 'POST',
-                                       headers: { 'Content-Type': 'application/json' },
-                                       body: JSON.stringify({ productId: item.productId, quantity: item.quantity })
-                                     });
-                                   }
+                                   await Promise.all(
+                                     order.items.map((item: any) => {
+                                       const productId = item.productId?._id?.toString() || item.productId?.toString();
+                                       if (!productId) return Promise.resolve();
+                                       return fetch('/api/cart', {
+                                         method: 'POST',
+                                         headers: { 'Content-Type': 'application/json' },
+                                         body: JSON.stringify({ productId, action: 'add', quantity: item.quantity })
+                                       });
+                                     })
+                                   );
                                    toast.success('Items added to your cart!');
                                  } catch {
                                    toast.error('Failed to reorder. Please try again.');
@@ -283,7 +287,7 @@ export default function OrdersPage() {
                 
                 {pastOrders.length > (showAllHistory ? Infinity : 5) && !showAllHistory && (
                   <button onClick={() => setShowAllHistory(true)} className="w-full py-3.5 md:py-4 rounded-[1.25rem] md:rounded-[1.5rem] border-2 border-dashed border-[#c8d4c3] text-[#5c6359] font-bold text-[13px] hover:bg-white hover:border-[#1b4321] transition-all mt-4 md:mt-6 cursor-pointer">
-                    Load More History ({pastOrders.length - 5} more)
+                     Load More History ({pastOrders.length - 5} more)
                   </button>
                 )}
               </div>
