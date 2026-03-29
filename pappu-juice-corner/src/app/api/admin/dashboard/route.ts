@@ -113,6 +113,28 @@ export async function GET() {
     const dailyOrderCount = todaysOrders.length;
     const currentHourOrders = todaysOrders.filter(o => new Date(o.createdAt) >= startOfHour).length;
 
+    // Count orders in previous hour for percentage change
+    const startOfPrevHour = new Date(startOfHour);
+    startOfPrevHour.setHours(startOfPrevHour.getHours() - 1);
+    const prevHourOrders = todaysOrders.filter(o => {
+      const t = new Date(o.createdAt);
+      return t >= startOfPrevHour && t < startOfHour;
+    }).length;
+
+    // Calculate percentage change
+    let hourlyChange = 0;
+    let hourlyChangeLabel = "vs last hour";
+    if (prevHourOrders === 0 && currentHourOrders > 0) {
+      hourlyChangeLabel = "New this hour";
+    } else if (prevHourOrders > 0) {
+      hourlyChange = Math.round(((currentHourOrders - prevHourOrders) / prevHourOrders) * 100);
+    }
+
+    // Calculate kitchen capacity based on current active orders
+    const maxCapacity = settings?.delivery?.maxHourlyCapacity || 20;
+    const capacityPercent = Math.min(Math.round((currentHourOrders / maxCapacity) * 100), 100);
+    const kitchenCapacity = `${capacityPercent}% Capacity`;
+
     const monthlyRevenue = monthlyOrdersRaw.reduce((acc, curr) => acc + curr.grandTotal, 0);
     const monthlyOrdersCount = monthlyOrdersRaw.length;
     const avgOrderValue = monthlyOrdersCount > 0 ? Math.round(monthlyRevenue / monthlyOrdersCount) : 0;
@@ -174,8 +196,10 @@ export async function GET() {
       },
       stats: {
         currentHourOrders,
+        hourlyChange,
+        hourlyChangeLabel,
         totalJuicesToday,
-        kitchenCapacity: "88%",
+        kitchenCapacity,
         monthlyRevenue,
         monthlyOrdersCount,
         avgOrderValue,

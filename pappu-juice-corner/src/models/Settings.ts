@@ -21,6 +21,7 @@ export interface ISettings extends Document {
     superInstantPrice: number;
     taxRate: number;
     hourlyArrivalOffset: number;
+    maxHourlyCapacity: number;
     instantArrivalMins: number;
     superInstantArrivalMins: number;
   };
@@ -58,6 +59,7 @@ const SettingsSchema: Schema = new Schema(
       superInstantPrice: { type: Number, default: 9.00 },
       taxRate: { type: Number, default: 0.02 },
       hourlyArrivalOffset: { type: Number, default: 2 },
+      maxHourlyCapacity: { type: Number, default: 20 },
       instantArrivalMins: { type: Number, default: 30 },
       superInstantArrivalMins: { type: Number, default: 15 }
     },

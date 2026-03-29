@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
+import DOMPurify from 'isomorphic-dompurify';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -29,7 +30,7 @@ export default function AboutPage() {
             <span className="inline-block px-4 py-1.5 rounded-full bg-[#5d7543] text-white font-headline text-xs font-bold tracking-widest uppercase mb-4 md:mb-6">
               Our Philosophy
             </span>
-            <h1 className="text-3xl sm:text-4xl md:text-7xl font-black font-headline text-on-surface leading-[1.1] tracking-tighter mb-5 md:mb-8" dangerouslySetInnerHTML={{ __html: settings?.about?.heroTitle || "Rooted in Nature, <br /> <span class='text-primary italic'>Pressed for Life.</span>" }}>
+            <h1 className="text-3xl sm:text-4xl md:text-7xl font-black font-headline text-on-surface leading-[1.1] tracking-tighter mb-5 md:mb-8" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(settings?.about?.heroTitle || "Rooted in Nature, <br /> <span class='text-primary italic'>Pressed for Life.</span>") }}>
             </h1>
             <p className="text-on-surface-variant text-base md:text-xl leading-relaxed max-w-lg mb-8 md:mb-10">
               We believe that the best medicine is grown, not manufactured. Every bottle of Pappu Juice Corner is a testament to the untamed vitality of the earth.

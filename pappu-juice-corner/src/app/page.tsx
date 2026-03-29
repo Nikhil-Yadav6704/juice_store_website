@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
+import DOMPurify from 'isomorphic-dompurify';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -23,7 +24,7 @@ export default function Home() {
             <span className="inline-block bg-[#52634f] text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-5 md:mb-8 shadow-sm">
               Cold Pressed Freshness
             </span>
-            <h1 className="text-4xl sm:text-5xl md:text-[5.5rem] font-extrabold text-on-surface font-headline leading-[1] tracking-tight mb-4 md:mb-6" dangerouslySetInnerHTML={{ __html: settings?.home?.heroTitle || "The Art of <br /> <span class='text-primary italic font-serif'>Living Raw.</span>" }}>
+            <h1 className="text-4xl sm:text-5xl md:text-[5.5rem] font-extrabold text-on-surface font-headline leading-[1] tracking-tight mb-4 md:mb-6" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(settings?.home?.heroTitle || "The Art of <br /> <span class='text-primary italic font-serif'>Living Raw.</span>") }}>
             </h1>
             <p className="text-on-surface-variant text-base md:text-lg font-medium leading-relaxed mb-8 md:mb-10 max-w-[400px]">
               {settings?.home?.heroSubtitle || "Crafted by nutritionists, delivered by locals. High-integrity juices that transform your cellular energy in minutes."}

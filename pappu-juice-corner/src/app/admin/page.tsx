@@ -163,7 +163,7 @@ export default function AdminDashboard() {
               <span className="material-symbols-outlined text-on-primary-fixed">shopping_cart</span>
             </div>
             <span className="bg-[#e4fcde] text-[#0d631b] px-3 py-1 rounded-full text-xs font-bold font-label">
-              +12% vs last hour
+              {dashboardData?.stats?.hourlyChange >= 0 ? '+' : ''}{dashboardData?.stats?.hourlyChange || 0}% {dashboardData?.stats?.hourlyChangeLabel || 'vs last hour'}
             </span>
           </div>
           <div>
