@@ -147,7 +147,6 @@ export default function AdminUsersPage() {
              className="w-full bg-surface-container-low p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20"
            >
              <option>Consumer / Standard</option>
-             <option>Wholesale Buyer</option>
              <option>System Administrator</option>
            </select>
            <button 

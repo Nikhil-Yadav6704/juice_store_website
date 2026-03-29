@@ -33,7 +33,6 @@ export async function POST(req: Request) {
 
     // Map UI roles to DB roles if necessary
     let dbRole = "user";
-    if (role === "Wholesale Buyer") dbRole = "wholesale";
     if (role === "System Administrator") dbRole = "admin";
 
     const newUser = await User.create({

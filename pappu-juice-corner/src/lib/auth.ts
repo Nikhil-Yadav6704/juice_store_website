@@ -103,13 +103,16 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user }) {
-      await connectToDatabase();
-      const dbUser = await User.findOne({ email: token.email });
-      if (dbUser) {
-        token.id = dbUser._id.toString();
-        token.role = dbUser.role;
-        token.status = dbUser.status;
-        token.isProfileIncomplete = !dbUser.phone || !dbUser.deliveryAddress || !dbUser.password;
+      // Only hit the database on initial sign-in, not on every request
+      if (user) {
+        await connectToDatabase();
+        const dbUser = await User.findOne({ email: user.email });
+        if (dbUser) {
+          token.id = dbUser._id.toString();
+          token.role = dbUser.role;
+          token.status = dbUser.status;
+          token.isProfileIncomplete = !dbUser.phone || !dbUser.deliveryAddress || !dbUser.password;
+        }
       }
       return token;
     },

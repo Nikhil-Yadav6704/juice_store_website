@@ -95,7 +95,7 @@ export async function POST(req: Request) {
     if (deliveryType === "super_instant") deliveryFee = settings?.delivery?.superInstantPrice || 9.00;
 
     const taxRate = settings?.delivery?.taxRate || 0;
-    const taxAmount = Math.round(subtotal * (taxRate / 100));
+    const taxAmount = Math.round(subtotal * taxRate);
     const grandTotal = subtotal + deliveryFee + taxAmount;
 
     // Create Order with unique ID check (Fix for Problem 1)

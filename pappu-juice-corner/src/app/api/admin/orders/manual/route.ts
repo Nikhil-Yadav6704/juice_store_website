@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
     const subtotal = product.price * quantity;
     const taxRate = settings?.delivery?.taxRate || 0;
-    const taxAmount = Math.round(subtotal * (taxRate / 100));
+    const taxAmount = Math.round(subtotal * taxRate);
     const grandTotal = subtotal + taxAmount;
 
     // Generate Unique Order ID
