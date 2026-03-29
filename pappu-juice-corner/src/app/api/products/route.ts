@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
 import Product from "@/models/Product";
-import User from "@/models/User";
-import bcrypt from "bcryptjs";
 
 const SEED_PRODUCTS = [
   {
@@ -70,26 +70,15 @@ export async function GET(request: NextRequest) {
     products = await Product.find({ isVisible: true });
   }
 
-  // Auto-seed admin user for the demo
-  const adminExists = await User.findOne({ email: "admin@pappujuice.com" });
-  if (!adminExists) {
-    const hashedPassword = await bcrypt.hash("admin123", 10);
-    await User.create({
-      fullName: "Demo Admin",
-      email: "admin@pappujuice.com",
-      phone: "0000000000",
-      deliveryAddress: "Admin Office",
-      password: hashedPassword,
-      role: "admin",
-      status: "active",
-    });
-    console.log("Seeded Demo Admin: admin@pappujuice.com / admin123");
-  }
-
   return NextResponse.json(products);
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user?.role !== 'admin') {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     await connectToDatabase();
     const body = await request.json();
