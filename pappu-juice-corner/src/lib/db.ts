@@ -7,58 +7,46 @@ if (!cached) {
 }
 
 async function connectToDatabase() {
-  if (cached.conn) {
-    return cached.conn;
+  // Always register models first — runs on every call, warm or cold
+  if (!(global as any).modelsRegistered) {
+    await Promise.all([
+      import('@/models/User'),
+      import('@/models/Product'),
+      import('@/models/Order'),
+      import('@/models/Cart'),
+      import('@/models/Settings'),
+    ]);
+    (global as any).modelsRegistered = true;
   }
 
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
+  // Then handle connection caching
+  if (cached.conn) return cached.conn;
 
+  if (!cached.promise) {
     const originalUri = process.env.MONGODB_URI;
 
-    // Production environment variable validation
-    if (process.env.NODE_ENV === "production") {
-      const requiredEnvVars = ["MONGODB_URI", "NEXTAUTH_SECRET", "NEXTAUTH_URL"];
+    if (process.env.NODE_ENV === 'production') {
+      const requiredEnvVars = ['MONGODB_URI', 'NEXTAUTH_SECRET', 'NEXTAUTH_URL'];
       const missingVars = requiredEnvVars.filter((v) => !process.env[v]);
       if (missingVars.length > 0) {
-        console.error("❌ CRITICAL: Missing production environment variables:", missingVars.join(", "));
-      }
-
-      if (process.env.NEXTAUTH_URL?.endsWith("/")) {
-        console.error("⚠️ WARNING: NEXTAUTH_URL has a trailing slash. This can cause authentication issues on Vercel. Recommended: https://juice-store-website.vercel.app");
+        console.error('❌ CRITICAL: Missing production environment variables:', missingVars.join(', '));
       }
     }
 
-    // Use memory server if no real URI is provided or if using the dummy URI
-    if (!originalUri || originalUri.includes("127.0.0.1") || originalUri.includes("localhost")) {
-      console.log("🚀 Initializing In-Memory MongoDB Server for seamless local testing...");
-      
+    if (!originalUri || originalUri.includes('127.0.0.1') || originalUri.includes('localhost')) {
       cached.promise = (async () => {
         const { MongoMemoryServer } = await import('mongodb-memory-server');
-        if (!cached.server) {
-          cached.server = await MongoMemoryServer.create();
-        }
+        if (!cached.server) cached.server = await MongoMemoryServer.create();
         const uri = cached.server.getUri();
-        console.log(`\n✅ Connected to In-Memory Database seamlessly!\n`);
-        return mongoose.connect(uri, opts);
+        return mongoose.connect(uri, { bufferCommands: false });
       })();
     } else {
-      cached.promise = mongoose.connect(originalUri, opts).then((mongoose) => mongoose);
+      cached.promise = mongoose.connect(originalUri, { bufferCommands: false });
     }
   }
 
   try {
     cached.conn = await cached.promise;
-    
-    // Register all models here so they are always available
-    // regardless of which API route triggered the connection
-    await Promise.all([
-      import('@/models/User'),
-      import('@/models/Product'),
-      import('@/models/Order'),
-    ]);
   } catch (e) {
     cached.promise = null;
     throw e;
