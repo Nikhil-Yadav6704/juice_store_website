@@ -20,9 +20,16 @@ export default function AdminDashboard() {
     refreshInterval: 30000,
     dedupingInterval: 10000
   });
+  const { data: products } = useSWR("/api/products", fetcher);
   
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
   const [growthView, setGrowthView] = useState<'Monthly' | 'Weekly'>('Monthly');
+
+  // POS Modal State
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleExport = () => {
     if (!dashboardData) return toast.error("No data to export");
@@ -45,6 +52,36 @@ export default function AdminDashboard() {
     ];
     exportToCSV(exportData, `orchard_dashboard_summary_${new Date().toISOString().split('T')[0]}`);
     toast.success("Dashboard export complete");
+  };
+
+  const handleCreatePOSOrder = async () => {
+    if (!selectedProductId) return toast.error("Please select a product");
+    if (quantity < 1) return toast.error("Quantity must be at least 1");
+
+    setIsProcessing(true);
+    try {
+      const res = await fetch("/api/admin/orders/manual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: selectedProductId, quantity, customerPhone }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`Order ${data.orderId} instantly queued!`);
+        setIsNewOrderModalOpen(false);
+        // Reset state
+        setSelectedProductId("");
+        setQuantity(1);
+        setCustomerPhone("");
+      } else {
+        toast.error(data.message || "Failed to create order");
+      }
+    } catch {
+      toast.error("An error occurred while processing the order");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
 
@@ -74,24 +111,45 @@ export default function AdminDashboard() {
           <p className="text-sm text-on-surface-variant mb-6">Enter rapid details for in-store walk-in customers.</p>
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Customer Phone (Optional)</label>
-            <input type="text" placeholder="+91 98765 43210" className="w-full bg-surface-container-low p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20" />
+            <input 
+              type="text" 
+              placeholder="+91 98765 43210" 
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+              className="w-full bg-surface-container-low p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20" 
+            />
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Select Cold-Press Selection</label>
-            <select className="w-full bg-surface-container-low p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20 appearance-none">
-              <option>Golden Mango (₹350)</option>
-              <option>Beet Beauty (₹250)</option>
-              <option>Green Revive (₹300)</option>
-            </select>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2 space-y-2">
+              <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Select Cold-Press Selection</label>
+              <select 
+                value={selectedProductId}
+                onChange={(e) => setSelectedProductId(e.target.value)}
+                className="w-full bg-surface-container-low p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
+              >
+                <option value="">Select Juice</option>
+                {products?.map((p: any) => (
+                  <option key={p._id} value={p._id}>{p.name} (₹{p.price})</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Quantity</label>
+              <input 
+                type="number" 
+                min="1" 
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                className="w-full bg-surface-container-low p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20" 
+              />
+            </div>
           </div>
           <button 
-            onClick={() => {
-              toast.success("Manual POS order instantly queued!");
-              setIsNewOrderModalOpen(false);
-            }} 
-            className="w-full bg-primary text-on-primary py-4 rounded-xl font-bold mt-4 hover:shadow-lg transition-all cursor-pointer"
+            onClick={handleCreatePOSOrder}
+            disabled={isProcessing}
+            className={`w-full bg-primary text-on-primary py-4 rounded-xl font-bold mt-4 transition-all cursor-pointer ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'}`}
           >
-            Process & Queue Order
+            {isProcessing ? "Processing..." : "Process & Queue Order"}
           </button>
         </div>
       </Modal>

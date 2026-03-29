@@ -17,10 +17,18 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
 
   const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [userPage, setUserPage] = useState(1);
   const USERS_PER_PAGE = 10;
+
+  // Form State
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("Consumer / Standard");
+  const [tempPassword, setTempPassword] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
   const handleExport = () => {
     if (!users) return toast.error("No directory to export");
@@ -57,6 +65,37 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleCreateUser = async () => {
+    if (!fullName || !email) return toast.error("Name and Email are required");
+    
+    setIsCreating(true);
+    try {
+      const res = await fetch("/api/admin/users/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, email, role }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setTempPassword(data.tempPassword);
+        setIsNewUserModalOpen(false);
+        setIsPasswordModalOpen(true);
+        // Clear form
+        setFullName("");
+        setEmail("");
+        setRole("Consumer / Standard");
+        mutate();
+      } else {
+        toast.error(data.message || "Failed to create user");
+      }
+    } catch {
+      toast.error("An error occurred while creating the user");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   if (isLoading) return <div className="p-8 font-bold text-xl">Loading directory...</div>;
   if (error) return <div className="p-8 text-error font-bold">Failed to load users.</div>;
 
@@ -88,14 +127,60 @@ export default function AdminUsersPage() {
 
       <Modal isOpen={isNewUserModalOpen} onClose={() => setIsNewUserModalOpen(false)} title="Register New User">
         <div className="space-y-4">
-           <input type="text" placeholder="Full Name" className="w-full bg-surface-container-low p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20" />
-           <input type="email" placeholder="Email Address" className="w-full bg-surface-container-low p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20" />
-           <select className="w-full bg-surface-container-low p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20">
+           <input 
+             type="text" 
+             placeholder="Full Name" 
+             value={fullName}
+             onChange={(e) => setFullName(e.target.value)}
+             className="w-full bg-surface-container-low p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20" 
+           />
+           <input 
+             type="email" 
+             placeholder="Email Address" 
+             value={email}
+             onChange={(e) => setEmail(e.target.value)}
+             className="w-full bg-surface-container-low p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20" 
+           />
+           <select 
+             value={role}
+             onChange={(e) => setRole(e.target.value)}
+             className="w-full bg-surface-container-low p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20"
+           >
              <option>Consumer / Standard</option>
              <option>Wholesale Buyer</option>
              <option>System Administrator</option>
            </select>
-           <button onClick={() => { toast.success("User registered remotely!"); setIsNewUserModalOpen(false); }} className="w-full bg-primary text-on-primary py-3 rounded-xl font-bold mt-2 cursor-pointer">Send Invitation</button>
+           <button 
+             onClick={handleCreateUser}
+             disabled={isCreating}
+             className={`w-full bg-primary text-on-primary py-3 rounded-xl font-bold mt-2 cursor-pointer ${isCreating ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'}`}
+           >
+             {isCreating ? "Creating..." : "Create User"}
+           </button>
+        </div>
+      </Modal>
+
+      <Modal isOpen={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)} title="User Created Successfully">
+        <div className="space-y-4 py-4">
+          <p className="text-sm text-on-surface-variant">Please share this temporary password with the user. They can change it via their profile page after logging in.</p>
+          <div className="bg-surface-container-highest p-6 rounded-2xl flex items-center justify-between group">
+            <span className="text-2xl font-mono font-bold tracking-widest text-primary">{tempPassword}</span>
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText(tempPassword);
+                toast.success("Password copied to clipboard");
+              }}
+              className="w-10 h-10 bg-surface-container-low rounded-full flex items-center justify-center hover:bg-outline-variant transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[20px]">content_copy</span>
+            </button>
+          </div>
+          <button 
+            onClick={() => setIsPasswordModalOpen(false)}
+            className="w-full bg-primary text-on-primary py-4 rounded-xl font-bold mt-4 hover:shadow-lg transition-all cursor-pointer"
+          >
+            I've noted the password
+          </button>
         </div>
       </Modal>
 
