@@ -54,7 +54,7 @@ export default function LoginPage() {
         <div className="hidden md:flex gap-10 font-medium text-sm text-on-surface-variant">
           <Link href="/menu" className="hover:text-primary transition-colors">Menu</Link>
           <Link href="/menu" className="hover:text-primary transition-colors">Juices</Link>
-          <Link href="/our-story" className="hover:text-primary transition-colors">Our Story</Link>
+          <Link href="/about" className="hover:text-primary transition-colors">Our Story</Link>
         </div>
         <div className="flex items-center gap-4 md:gap-6 text-sm font-bold">
           <Link href="/auth/login" className="text-on-surface hover:text-primary transition-colors text-xs md:text-sm">Login</Link>

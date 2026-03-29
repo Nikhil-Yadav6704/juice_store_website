@@ -213,7 +213,7 @@ export default function Home() {
                     Get Started Now
                   </Link>
                   <Link href="/menu" className="w-full sm:w-auto bg-transparent text-white border-2 border-white/30 px-7 md:px-8 py-3.5 md:py-4 rounded-full text-sm font-bold hover:bg-white/10 transition-colors flex items-center justify-center">
-                    Browse Subscriptions
+                    Browse Our Menu
                   </Link>
                 </>
               ) : (

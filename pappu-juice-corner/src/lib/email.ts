@@ -17,7 +17,7 @@ export const sendOtpEmail = async (email: string, otp: string) => {
   try {
     const resendInstance = getResend();
     const { data, error } = await resendInstance.emails.send({
-      from: "Orchard <onboarding@resend.dev>", // Replace with verified domain in production
+      from: "Pappu Juice Corner <onboarding@resend.dev>", // Replace with verified domain in production
       to: [email],
       subject: "Your Verification Code - Pappu Juice Corner",
       html: `

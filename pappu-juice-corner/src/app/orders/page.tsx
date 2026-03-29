@@ -324,12 +324,12 @@ export default function OrdersPage() {
                   
                   <div className="space-y-2">
                     <button onClick={() => window.location.href = 'mailto:support@pappujuice.com?subject=Order Support'} className="w-full flex items-center justify-start gap-3 p-3 text-[13px] font-medium text-[#5c6359] hover:text-[#1b4321] hover:bg-white rounded-xl transition-all cursor-pointer">
-                      <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
-                      Chat with Support
+                      <span className="material-symbols-outlined text-[18px]">mail</span>
+                      Contact Support
                     </button>
                     <button onClick={() => window.location.href = '/about'} className="w-full flex items-center justify-start gap-3 p-3 text-[13px] font-medium text-[#5c6359] hover:text-[#1b4321] hover:bg-white rounded-xl transition-all cursor-pointer">
-                      <span className="material-symbols-outlined text-[18px]">help_outline</span>
-                      Delivery FAQ
+                      <span className="material-symbols-outlined text-[18px]">history_edu</span>
+                      Our Story
                     </button>
                   </div>
                </div>
